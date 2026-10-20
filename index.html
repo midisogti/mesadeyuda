@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OGTI - Control de atenciones (requerimiento e incidentes)</title>
+    <!-- Tailwind CSS for modern responsive layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midisRedPrimary: '#C5221F',
+                        midisRedSecondary: '#E53935',
+                        midisGreenAccent: '#059669',
+                        midisLightBg: '#F8FAFC',
+                        midisCardBg: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        :root {
+            --bg-body: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --header-bg: #1e293b;
+            --header-text: #f8fafc;
+            --red-primary: #e11d48;
+            --red-light: #fff1f2;
+            --red-dark: #be123c;
+            --green-primary: #059669;
+            --border-color: #e2e8f0;
+            --bar-bg: #f1f5f9;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            
+            /* Nuevas variables de diseño */
+            --title-red: #dc2626;
+            --title-red-light: #fef2f2;
+            --green-bg: #dcfce7;
+            --green-text: #166534;
+            --green-dot: #22c55e;
+            --red-bg: #fee2e2;
+            --red-text: #991b1b;
+            --red-dot: #ef4444;
+            --warning-bg: #ffedd5;
+            --warning-text: #c2410c;
+            --normal-bg: #f0fdf4;
+            --normal-text: #15803d;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 0;
+        }
+
+        .full-screen-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 24px;
+        }
+
+        /* Tarjetas de Analistas Modernas */
+        .card-analyst {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-analyst:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-analyst.available {
+            border: 2px solid #81C995;
+            background: linear-gradient(to bottom, #FFFFFF, #F1F8F5);
+        }
+
+        .card-analyst.available .status-badge {
+            background-color: #E6F4EA;
+            color: #137333;
+        }
+
+        .card-analyst.available .main-action {
+            background: linear-gradient(135deg, #E6F4EA 0%, #CEEAD6 100%);
+            color: #137333;
+            border: 1px solid #81C995;
+        }
+
+        .card-analyst.busy {
+            border: 2px solid #FAD2CF;
+            background: linear-gradient(to bottom, #FFFFFF, #FDF7F7);
+        }
+
+        .card-analyst.busy .status-badge {
+            background-color: #FCE8E6;
+            color: #C5221F;
+        }
+
+        .card-analyst.busy .main-action {
+            background: linear-gradient(135deg, #EA4335 0%, #C5221F 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 6px 15px -3px rgba(197, 34, 31, 0.4);
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        .main-action {
+            width: 100%;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.6rem;
+            letter-spacing: 1.5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        /* Estilos integrados de la nueva sección de estado general */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .status-pill::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-free { background-color: var(--green-bg); color: var(--green-text); }
+        .status-free::before { 
+            background-color: var(--green-dot); 
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-busy { background-color: var(--red-bg); color: var(--red-text); }
+        .status-busy::before { 
+            background-color: var(--red-dot); 
+            animation: pulse-red 1.2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .time-badge-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .time-badge-custom svg { width: 18px; height: 18px; }
+        .time-warning { background-color: var(--warning-bg); color: var(--warning-text); border: 1px solid #fed7aa; }
+        .time-normal { background-color: var(--normal-bg); color: var(--normal-text); border: 1px solid #bbf7d0; }
+        .empty-data { color: #94a3b8; font-weight: 600; font-size: 1.1rem; text-align: center; }
+
+        /* Estilos de la Tabla de Ranking */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 20px 24px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            font-size: 1.05rem;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .col-rank {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            width: 90px;
+            text-align: center;
+        }
+
+        .rank-trophy {
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+
+        .col-name {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text-dark);
+        }
+
+        .col-req {
+            font-weight: 700;
+            color: var(--green-primary);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .col-inc {
+            font-weight: 700;
+            color: var(--red-primary);
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .col-progress {
+            width: 35%;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .progress-stats {
+            display: flex;
+            flex-direction: column;
+            min-width: 55px;
+        }
+
+        .progress-num {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .progress-pct {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .bar-container {
+            flex-grow: 1;
+            background-color: var(--bar-bg);
+            height: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER INSTITUCIONAL MIDIS -->
+    <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 transition-all duration-300">
+        <div class="w-full px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white p-2 rounded-2xl shadow-md flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="Logo MIDIS" class="h-11 w-auto object-contain" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'">
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-2xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                        OGTI - Control de atenciones <span class="text-xs bg-black/20 text-white px-3 py-1 rounded-full uppercase tracking-wider font-bold border border-white/20">Mesa de Ayuda</span>
+                    </h1>
+                    <p class="text-xs md:text-sm text-red-100 font-medium">Oficina General de Tecnologías de la Información | Ministerio de Desarrollo e Inclusión Social</p>
+                </div>
+            </div>
+            
+            <!-- Navegación y Controles -->
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="switchView('operador')" id="btn-op" class="px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 text-white border border-white/20 transition shadow-md hover:bg-red-900">
+                    <i class="fa-solid fa-headset mr-2"></i> Panel Analista
+                </button>
+                <button onclick="switchView('ranking')" id="btn-rank" class="px-5 py-2.5 text-sm font-bold rounded-xl bg-white text-red-700 transition shadow-md hover:bg-red-50">
+                    <i class="fa-solid fa-chart-column mr-2"></i> Módulos y Ranking
+                </button>
+                <button onclick="toggleFullScreen()" title="Pantalla Completa" class="px-4 py-2.5 bg-red-900/60 hover:bg-red-900 text-white rounded-xl border border-white/20 transition shadow-md font-bold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-expand"></i> Pantalla Completa
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="full-screen-wrapper w-full flex-grow">
+
+        <!-- ================= VISTA 1: PANEL ANALISTA SOPORTE ================= -->
+        <div id="view-operador" class="space-y-6 w-full hidden">
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-3">
+                        <i class="fa-solid fa-user-gear text-red-600 text-2xl"></i> Gestión de Atención por Analista Soporte
+                    </h2>
+                    <button onclick="limpiarRegistros()" class="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-trash-can"></i> Limpiar Registros
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Analista Soporte</label>
+                        <select id="op-nombre" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3.5 text-base text-slate-800 font-semibold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100">
+                            <option value="Rocky Antizana">Rocky Antizana</option>
+                            <option value="Carlos Farro">Carlos Farro</option>
+                            <option value="Carlitos Hidalgo">Carlitos Hidalgo</option>
+                            <option value="Hernand de la Cruz">Hernand de la Cruz</option>
+                            <option value="Mijael Rivera">Mijael Rivera</option>
+                            <option value="Alonso Venegas">Alonso Venegas</option>
+                            <option value="Manuel Rivera">Manuel Rivera</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Estado Operativo</label>
+                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3.5 text-base font-bold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100" onchange="verificarEstadoLibre()">
+                            <option value="libre" class="text-emerald-700">🟢 Libre (Disponible)</option>
+                            <option value="ocupado" class="text-rose-700">🔴 Ocupado (Atendiendo)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Código iTop (Ej. R-006781 o I-6766)</label>
+                        <input type="text" id="op-ticket" placeholder="R-006781" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3.5 text-base uppercase font-mono tracking-wider focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 font-bold">
+                    </div>
+
+                    <div>
+                        <button onclick="guardarAtencion()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 px-6 rounded-2xl text-base transition shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-lg"></i> Registrar Estado
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN INTEGRADA: ESTADO GENERAL DE ANALISTAS SOPORTE OGTI (Basado en el nuevo código limpio solicitado) -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-red-50 text-red-600 w-12 h-12 rounded-2xl flex justify-center items-center">
+                        <svg class="w-6 h-6 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-red-600 uppercase tracking-wide">Estado General De Analistas Soporte Ogti</h2>
+                </div>
+                <div class="table-container overflow-x-auto rounded-xl border border-slate-200">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ANALISTA SOPORTE</th>
+                                <th>ESTADO</th>
+                                <th>TICKET EN ATENCIÓN</th>
+                                <th>PROGRESO TOTAL DE ATENCIONES</th>
+                                <th>TIEMPO TRANSCURRIDO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-analistas-general" class="divide-y divide-slate-100">
+                            <!-- Inyectado por JS dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VISTA 2: MÓDULOS Y RANKING ================= -->
+        <div id="view-ranking" class="space-y-8 w-full">
+            
+            <!-- SECCIÓN 1: Módulos con Reloj Grande Integrado -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3 text-slate-900 font-extrabold text-2xl">
+                        <div class="p-3 bg-emerald-100 text-emerald-700 rounded-2xl">
+                            <i class="fa-solid fa-display text-2xl"></i>
+                        </div>
+                        MÓDULOS Y ESTADO DE ANALISTAS SOPORTE OGTI
+                    </div>
+                    <div id="live-clock-card" class="bg-gradient-to-r from-slate-900 to-slate-800 text-emerald-400 border border-slate-700 px-6 py-3 rounded-2xl font-mono font-black text-xl tracking-widest shadow-lg flex items-center gap-3">
+                        <i class="fa-regular fa-clock text-emerald-400"></i> <span>--/--/---- --:--:--</span>
+                    </div>
+                </div>
+
+                <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Inyectado por JS -->
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: Tabla de Ranking Integrada -->
+            <div class="container bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl max-w-full">
+                <div class="page-header flex justify-between items-center pb-6 mb-6 border-b border-slate-100 px-0 pt-0">
+                    <div class="title-wrapper flex items-center gap-4">
+                        <div class="icon-box bg-rose-50 text-red-600 w-12 h-12 rounded-2xl flex justify-center items-center">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-slate-900 uppercase tracking-wide">Ranking de Atenciones</h2>
+                    </div>
+                    <div class="badge-live bg-slate-100 text-slate-600 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+                        Estadísticas en Vivo
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;"># RANKING</th>
+                                <th>ANALISTA SOPORTE</th>
+                                <th style="text-align: center;">REQUERIMIENTOS (R)</th>
+                                <th style="text-align: center;">INCIDENTES (I)</th>
+                                <th>PROGRESO TOTAL DE ATENCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ranking" class="divide-y divide-slate-100">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER INSTITUCIONAL -->
+    <footer id="main-footer" class="bg-slate-900 text-slate-300 text-sm py-5 px-8 border-t border-slate-800 mt-12 transition-all duration-300">
+        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
+            <p class="font-semibold">© 2026 Ministerio de Desarrollo e Inclusión Social - Oficina General de Tecnologías de la Información (OGTI)</p>
+            <p class="font-mono text-emerald-400 font-bold">Sistema iTop Integrado | Versión 3.3 Enterprise</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPT DE CONTROL Y LÓGICA -->
+    <script>
+        let analistasData = JSON.parse(localStorage.getItem('ogti_analistas_v9')) || [
+            { id: 1, nombre: "Rocky Antizana", estado: "libre", ticket: "-", startTime: null, totalR: 14, totalI: 8 },
+            { id: 2, nombre: "Carlos Farro", estado: "ocupado", ticket: "R-006781", startTime: Date.now() - 3900000, totalR: 19, totalI: 12 },
+            { id: 3, nombre: "Carlitos Hidalgo", estado: "libre", ticket: "-", startTime: null, totalR: 10, totalI: 15 },
+            { id: 4, nombre: "Hernand de la Cruz", estado: "libre", ticket: "-", startTime: null, totalR: 22, totalI: 9 },
+            { id: 5, nombre: "Mijael Rivera", estado: "ocupado", ticket: "I-006766", startTime: Date.now() - 1800000, totalR: 8, totalI: 18 },
+            { id: 6, nombre: "Alonso Venegas", estado: "libre", ticket: "-", startTime: null, totalR: 11, totalI: 7 },
+            { id: 7, nombre: "Manuel Rivera", estado: "libre", ticket: "-", startTime: null, totalR: 16, totalI: 10 }
+        ];
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            const fechaStr = ahora.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const horaStr = ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const relojElem = document.getElementById('live-clock-card');
+            if(relojElem) {
+                relojElem.innerHTML = `<i class="fa-regular fa-clock text-emerald-400"></i> <span>${fechaStr}  ${horaStr}</span>`;
+            }
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+
+        function switchView(view) {
+            document.getElementById('view-operador').classList.add('hidden');
+            document.getElementById('view-ranking').classList.add('hidden');
+
+            document.getElementById('btn-op').className = 'px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 text-white border border-white/20 transition shadow-md hover:bg-red-900';
+            document.getElementById('btn-rank').className = 'px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 text-white border border-white/20 transition shadow-md hover:bg-red-900';
+
+            if(view === 'operador') {
+                document.getElementById('view-operador').classList.remove('hidden');
+                document.getElementById('btn-op').className = 'px-5 py-2.5 text-sm font-bold rounded-xl bg-white text-red-700 transition shadow-md hover:bg-red-50';
+                renderTablaAnalistasGeneral();
+            } else if(view === 'ranking') {
+                document.getElementById('view-ranking').classList.remove('hidden');
+                document.getElementById('btn-rank').className = 'px-5 py-2.5 text-sm font-bold rounded-xl bg-white text-red-700 transition shadow-md hover:bg-red-50';
+                renderRankingYModulos();
+            }
+        }
+
+        function verificarEstadoLibre() {
+            const estado = document.getElementById('op-estado').value;
+            const ticketInput = document.getElementById('op-ticket');
+            if (estado === 'libre') {
+                ticketInput.value = '-';
+                ticketInput.disabled = true;
+            } else {
+                ticketInput.disabled = false;
+                if (ticketInput.value === '-') ticketInput.value = '';
+            }
+        }
+
+        function guardarAtencion() {
+            const nombreSel = document.getElementById('op-nombre').value;
+            const estadoSel = document.getElementById('op-estado').value;
+            let ticketSel = document.getElementById('op-ticket').value.trim().toUpperCase() || '-';
+
+            if(estadoSel === 'libre') {
+                ticketSel = '-';
+            } else if(ticketSel !== '-') {
+                if(!ticketSel.startsWith('R-') && !ticketSel.startsWith('I-')) {
+                    if(/^\d+$/.test(ticketSel)) {
+                        ticketSel = 'R-' + ticketSel.padStart(6, '0');
+                    }
+                }
+            }
+
+            let analista = analistasData.find(a => a.nombre === nombreSel);
+            if(analista) {
+                const estadoAnterior = analista.estado;
+                analista.estado = estadoSel;
+                
+                if(estadoSel === 'ocupado') {
+                    if (estadoAnterior !== 'ocupado' || analista.ticket !== ticketSel) {
+                        analista.startTime = Date.now();
+                        if(ticketSel.startsWith('I')) {
+                            analista.totalI = (analista.totalI || 0) + 1;
+                        } else {
+                            analista.totalR = (analista.totalR || 0) + 1;
+                        }
+                    }
+                    analista.ticket = ticketSel;
+                } else {
+                    analista.ticket = '-';
+                    analista.startTime = null;
+                }
+            }
+
+            localStorage.setItem('ogti_analistas_v9', JSON.stringify(analistasData));
+            renderTablaAnalistasGeneral();
+            mostrarNotificacionExito(`Estado actualizado correctamente para ${nombreSel}.`);
+        }
+
+        function limpiarRegistros() {
+            if(confirm("¿Está seguro de limpiar y reiniciar todos los registros y contadores del sistema?")) {
+                analistasData.forEach(a => {
+                    a.estado = 'libre';
+                    a.ticket = '-';
+                    a.startTime = null;
+                    a.totalR = 0;
+                    a.totalI = 0;
+                });
+                localStorage.setItem('ogti_analistas_v9', JSON.stringify(analistasData));
+                renderTablaAnalistasGeneral();
+                mostrarNotificacionExito("Sistema reiniciado con éxito.");
+            }
+        }
+
+        function renderTiempoGeneral(startTime) {
+            if (!startTime) return '<span class="empty-data">-</span>';
+            const diffSecs = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(diffSecs / 60);
+            const secs = diffSecs % 60;
+            const hrs = Math.floor(mins / 60);
+            const remMins = mins % 60;
+
+            let textoTiempo = hrs > 0 ? `${hrs}h ${remMins}m ${secs}s` : `${mins}m ${secs}s`;
+            
+            if (diffSecs >= 3600) {
+                return `<span class="time-badge-custom time-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    ${textoTiempo}
+                </span>`;
+            } else {
+                return `<span class="time-badge-custom time-normal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    ${textoTiempo}
+                </span>`;
+            }
+        }
+
+        function mostrarNotificacionExito(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 text-base font-bold flex items-center gap-3 animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-xl"></i> ${mensaje}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error al activar pantalla completa: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const header = document.getElementById('main-header');
+            const footer = document.getElementById('main-footer');
+            if (document.fullscreenElement) {
+                header.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+                footer.classList.add('hidden');
+            } else {
+                header.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+                footer.classList.remove('hidden');
+            }
+        });
+
+        function renderTablaAnalistasGeneral() {
+            const tbody = document.getElementById('tabla-analistas-general');
+            tbody.innerHTML = '';
+
+            let maxTotal = Math.max(...analistasData.map(a => (a.totalR + a.totalI)), 1);
+
+            analistasData.forEach(a => {
+                let statusHtml = '';
+                let ticketHtml = '';
+                let total = (a.totalR || 0) + (a.totalI || 0);
+                let porcentaje = Math.round((total / maxTotal) * 100);
+
+                if(a.estado === 'ocupado') {
+                    statusHtml = `<span class="status-pill status-busy">OCUPADO (Atendiendo)</span>`;
+                    ticketHtml = `<span class="ticket-code">${a.ticket}</span>`;
+                } else {
+                    statusHtml = `<span class="status-pill status-free">LIBRE (Disponible)</span>`;
+                    ticketHtml = `<span class="empty-data">-</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="analyst-name">${a.nombre}</td>
+                        <td>${statusHtml}</td>
+                        <td>${ticketHtml}</td>
+                        <td class="col-progress">
+                            <div class="progress-wrapper">
+                                <div class="progress-stats">
+                                    <span class="progress-num">${total}</span>
+                                    <span class="progress-pct">(${porcentaje}%)</span>
+                                </div>
+                                <div class="bar-container"><div class="bar-fill" style="width: ${porcentaje}%;"></div></div>
+                            </div>
+                        </td>
+                        <td>${renderTiempoGeneral(a.startTime)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderRankingYModulos() {
+            const gridModulos = document.getElementById('grid-analistas-modulos');
+            gridModulos.innerHTML = '';
+
+            analistasData.forEach(a => {
+                let cardClass = "card-analyst available";
+                let statusBadgeText = "LIBRE (Disponible)";
+                let mainActionText = "DISPONIBLE";
+                let tiempoHTML = "-";
+
+                if (a.estado === 'ocupado') {
+                    cardClass = "card-analyst busy";
+                    statusBadgeText = "ATENDIENDO";
+                    mainActionText = a.ticket;
+                    // Reutilizar la lógica visual de tiempo para la tarjeta
+                    const diffSecs = a.startTime ? Math.floor((Date.now() - a.startTime) / 1000) : 0;
+                    const mins = Math.floor(diffSecs / 60);
+                    const secs = diffSecs % 60;
+                    const hrs = Math.floor(mins / 60);
+                    const remMins = mins % 60;
+                    let textoTiempo = hrs > 0 ? `${hrs}h ${remMins}m ${secs}s` : `${mins}m ${secs}s`;
+                    if (diffSecs >= 3600) {
+                        tiempoHTML = `<span class="time-badge critical"><i class="fa-solid fa-triangle-exclamation"></i> ${textoTiempo} (> 1h)</span>`;
+                    } else {
+                        tiempoHTML = `<span class="time-badge normal"><i class="fa-regular fa-clock"></i> ${textoTiempo}</span>`;
+                    }
+                }
+
+                gridModulos.innerHTML += `
+                    <div class="${cardClass}">
+                        <div class="card-header flex justify-between items-start mb-5">
+                            <div class="status-badge">${statusBadgeText}</div>
+                        </div>
+                        <h3 class="analyst-name text-xl font-extrabold text-slate-900 mb-4">${a.nombre}</h3>
+                        <div class="main-action font-mono text-xl">
+                            ${mainActionText}
+                        </div>
+                        <div class="footer-info flex justify-between items-center text-sm font-semibold text-slate-600 border-t border-slate-100 pt-4 mt-4">
+                            <span>Tiempo de atención:</span>
+                            <span>${tiempoHTML}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let rankingOrdenado = [...analistasData].sort((a, b) => (b.totalR + b.totalI) - (a.totalR + a.totalI));
+            let maxTotal = Math.max(...rankingOrdenado.map(a => (a.totalR + a.totalI)), 1);
+
+            const tbodyRank = document.getElementById('tabla-ranking');
+            tbodyRank.innerHTML = '';
+
+            rankingOrdenado.forEach((a, index) => {
+                let total = (a.totalR || 0) + (a.totalI || 0);
+                let medal = index === 0 ? '<span class="rank-trophy">🥇</span>' : index === 1 ? '<span class="rank-trophy">🥈</span>' : index === 2 ? '<span class="rank-trophy">🥉</span>' : `#${index + 1}`;
+                let porcentaje = Math.round((total / maxTotal) * 100);
+
+                tbodyRank.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="col-rank">${medal}</td>
+                        <td class="col-name">${a.nombre}</td>
+                        <td class="col-req" style="text-align: center;">${a.totalR}</td>
+                        <td class="col-inc" style="text-align: center;">${a.totalI}</td>
+                        <td class="col-progress">
+                            <div class="progress-wrapper">
+                                <div class="progress-stats">
+                                    <span class="progress-num">${total}</span>
+                                    <span class="progress-pct">(${porcentaje}%)</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: ${porcentaje}%;"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        setInterval(() => {
+            if (!document.getElementById('view-operador').classList.contains('hidden')) {
+                renderTablaAnalistasGeneral();
+            } else if (!document.getElementById('view-ranking').classList.contains('hidden')) {
+                renderRankingYModulos();
+            }
+        }, 1000);
+
+        // Inicializar vista por defecto (Módulos y Ranking)
+        switchView('ranking');
+    </script>
+</body>
+</html>
