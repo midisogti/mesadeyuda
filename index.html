@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OGTI v16.0 - Control de atenciones (Móvil y Alertas)</title>
+    <title>OGTI v19.0 - Control de atenciones</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <!-- CONFIGURACIÓN FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, query, limitToLast, get, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, query, limitToLast, get, update, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB87OkfEp59VqEmq-qfc8kMYxuPjqqvWXg",
@@ -36,6 +36,7 @@
         window.firebaseLimitToLast = limitToLast;
         window.firebaseGet = get;
         window.firebaseUpdate = update;
+        window.firebaseRemove = remove; // IMPORTANTE PARA ELIMINAR
         
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
@@ -99,7 +100,6 @@
         #login-card { background: white; border-radius: 24px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         @media (min-width: 768px) { #login-card { padding: 40px; } }
         
-        /* Tooltip Imagen */
         .tooltip-img { position: relative; cursor: pointer; }
         .tooltip-img .tooltip-content { visibility: hidden; position: absolute; z-index: 100; bottom: 120%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 12px; border: 3px solid white; background: white; padding: 4px; }
         .tooltip-img:hover .tooltip-content { visibility: visible; opacity: 1; }
@@ -164,6 +164,17 @@
         /* PANTALLA COMPLETA */
         .fullscreen-active #main-header { transform: translateY(-100%); opacity: 0; pointer-events: none; position: absolute; }
         .fullscreen-active .full-screen-wrapper { padding-top: 20px; }
+
+        /* NUEVA ALERTA CENTRAL */
+        #central-alert {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: white; border-radius: 20px; padding: 30px; z-index: 2000;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 4px solid #C5221F;
+            text-align: center; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 90%; max-width: 400px;
+        }
+        #central-alert.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+        #central-alert i { font-size: 3rem; color: #C5221F; margin-bottom: 15px; animation: pulse-red 1s infinite; }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col justify-between">
@@ -173,10 +184,9 @@
         <div id="login-card">
             <div id="login-form-area">
                 <div class="text-center mb-6">
-                    <!-- LOGO LOCAL -->
                     <img src="logo.png" alt="MIDIS" class="h-14 mx-auto mb-4" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
                     <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
-                    <p class="text-sm text-slate-500 mt-1">v16.0 - Gestión Integral</p>
+                    <p class="text-sm text-slate-500 mt-1">v19.0 - Gestión Integral</p>
                 </div>
                 <div class="space-y-4">
                     <div>
@@ -187,7 +197,6 @@
                         <label class="block text-sm font-bold text-slate-700 mb-1">Contraseña</label>
                         <div class="relative">
                             <input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 font-semibold focus:outline-none focus:border-red-600">
-                            <!-- BOTÓN VER CONTRASEÑA -->
                             <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-600">
                                 <i id="toggle-icon" class="fa-solid fa-eye"></i>
                             </button>
@@ -196,7 +205,7 @@
                     <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
                     <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Ingresar</button>
                     <div class="text-xs text-slate-500 text-center pt-2 border-t border-slate-100">
-                       
+                        <div>Admin inicial: <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin</span> / <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin123</span></div>
                     </div>
                 </div>
             </div>
@@ -217,6 +226,14 @@
         </div>
     </div>
 
+    <!-- ALERTA CENTRAL FLOTANTE -->
+    <div id="central-alert">
+        <i class="fa-solid fa-bell"></i>
+        <h2 class="text-2xl font-extrabold text-slate-800 mb-2">¡Nuevo Ticket!</h2>
+        <p id="central-alert-text" class="text-lg font-mono font-bold text-red-600 mb-4">R-000000</p>
+        <button onclick="cerrarAlertaCentral()" class="w-full bg-slate-800 text-white font-bold py-2 rounded-xl">Entendido</button>
+    </div>
+
     <!-- MODALES Y TOASTS -->
     <div id="photo-modal" class="fixed inset-0 bg-black/80 z-[999] hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
         <div class="bg-white p-2 md:p-4 rounded-xl md:rounded-2xl max-w-3xl max-h-[90vh] overflow-auto relative w-full" onclick="event.stopPropagation()">
@@ -233,42 +250,52 @@
         <div><div id="chat-notif-name" class="font-bold text-sm text-slate-900"></div><div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div></div>
     </div>
 
-    <!-- HEADER -->
+    <!-- HEADER (DISEÑO SEGÚN IMAGEN) -->
     <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 hidden transition-all duration-500">
-        <div class="w-full px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+        <div class="w-full px-4 py-2 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <div class="flex items-center gap-3 md:gap-5 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center gap-3 md:gap-5">
+                    <!-- Recuadro blanco del logo -->
                     <div class="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl shadow-lg border border-white/20 flex items-center justify-center">
-                        <img src="logo.png" alt="MIDIS" class="h-6 md:h-8 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
+                        <img src="logo.png" alt="MIDIS" class="h-6 md:h-8 object-contain" onerror="this.src='https://placehold.co/100x30/C5221F/ffffff?text=MIDIS'">
                     </div>
                     <div>
-                        <h1 class="text-sm md:text-2xl font-extrabold tracking-tight flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-3 leading-tight">
+                        <h1 class="text-sm md:text-xl font-extrabold tracking-tight flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-3 leading-tight">
                             OGTI - Control de atenciones 
-                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-widest font-bold shadow-inner w-max">MESA DE AYUDA</span>
+                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold shadow-inner w-max">V19.0</span>
                         </h1>
-                        <p class="text-[10px] md:text-sm text-red-100 font-medium mt-0.5 hidden md:block">Oficina General de Tecnologías de la Información | MIDIS</p>
+                        <p class="text-[10px] md:text-xs text-red-100 font-medium mt-0.5 hidden md:block">Oficina General de Tecnologías de la Información | MIDIS</p>
                     </div>
                 </div>
-                <!-- Botón Salir en móvil -->
-                <button onclick="cerrarSesion()" id="btn-logout-mobile" class="md:hidden text-white bg-black/40 p-2 rounded-lg text-sm"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
             
             <div class="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                <div id="user-info" class="hidden flex items-center gap-2 bg-black/20 border border-white/20 rounded-lg px-2 py-1">
-                    <i class="fa-solid fa-user-circle text-base"></i>
-                    <div class="text-[10px]"><div id="user-name-display" class="font-bold"></div><div id="user-role-display" class="text-red-200 uppercase"></div></div>
+                <!-- Info de usuario (Estilo botón como en la imagen) -->
+                <div id="user-info" class="hidden flex items-center gap-2 bg-red-800/80 border border-red-500 rounded-lg px-3 py-1 shadow-md">
+                    <i class="fa-solid fa-user-circle text-lg text-white"></i>
+                    <div class="text-[10px] text-left leading-tight text-white">
+                        <div id="user-name-display" class="font-bold"></div>
+                        <div id="user-role-display" class="text-red-200 uppercase font-semibold"></div>
+                    </div>
                 </div>
+
                 <button onclick="switchView('operador')" id="btn-op" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-headset mr-1"></i> Operador</button>
                 <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-chart-column mr-1"></i> Módulos</button>
                 <button onclick="switchView('historial')" id="btn-hist" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
                 <button onclick="switchView('usuarios')" id="btn-users" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-amber-500/80 hover:bg-amber-500 text-white transition"><i class="fa-solid fa-users-gear mr-1"></i> Usuarios</button>
-                <button onclick="cerrarSesion()" id="btn-logout" class="hidden md:block px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white rounded-lg font-bold text-sm transition"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white rounded-lg font-bold text-sm transition ml-auto md:ml-0"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </div>
     </header>
 
     <main id="main-content" class="full-screen-wrapper w-full flex-grow hidden">
         
+        <!-- BOTÓN PARA ACTIVAR AUDIO EN MÓVILES -->
+        <div id="audio-activation-banner" class="hidden bg-amber-100 border border-amber-300 text-amber-800 p-3 rounded-xl mb-4 flex justify-between items-center shadow-sm">
+            <div class="text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-volume-high text-lg"></i> Para escuchar las alertas de tickets, toca este botón.</div>
+            <button onclick="activarAudioMovil()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-lg text-xs">Activar</button>
+        </div>
+
         <!-- VIEW: OPERADOR -->
         <div id="view-operador" class="space-y-4 md:space-y-6 w-full hidden">
             <div class="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200">
@@ -333,7 +360,7 @@
         <!-- VIEW: RANKING Y MODULOS -->
         <div id="view-ranking" class="space-y-4 md:space-y-6 w-full hidden">
             
-            <!-- TARJETA EXCLUSIVA PARA ANALISTAS (Responsiva) -->
+            <!-- TARJETA EXCLUSIVA PARA ANALISTAS -->
             <div id="analista-dashboard" class="hidden bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-3 md:gap-4 w-full md:w-auto">
@@ -343,28 +370,35 @@
                             <p class="text-xs md:text-sm text-slate-500 font-semibold">Mi Panel</p>
                         </div>
                     </div>
-                    <div class="bg-slate-50 p-3 md:p-4 rounded-lg md:rounded-xl border border-slate-200 w-full md:w-auto flex flex-col gap-2">
-                        <div class="flex justify-between items-center gap-4">
+                    
+                    <!-- TICKET DESTACADO -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 w-full md:w-auto flex flex-col gap-3 md:min-w-[280px]">
+                        <div class="flex justify-between items-center gap-4 border-b border-slate-200 pb-2">
                             <div>
-                                <div class="text-[10px] md:text-xs font-bold text-slate-500 uppercase">Ticket</div>
-                                <div class="text-xl md:text-2xl font-mono font-extrabold text-red-600" id="ana-ticket">LIBRE</div>
+                                <div class="text-[10px] md:text-xs font-bold text-slate-500 uppercase">Ticket Asignado</div>
+                                <div class="text-2xl md:text-3xl font-mono font-extrabold text-red-600" id="ana-ticket">LIBRE</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-[10px] md:text-xs font-bold text-slate-500 uppercase">Fecha/Hora</div>
                                 <div class="text-xs md:text-sm font-bold text-slate-800" id="ana-fecha">-</div>
                             </div>
                         </div>
-                        <div class="text-[10px] md:text-xs text-slate-600 bg-white p-2 rounded border border-slate-200" id="ana-comentario">
-                            Sin comentarios.
+                        
+                        <!-- EVIDENCIA Y COMENTARIO (Clickeable) -->
+                        <div id="ana-evidencia-box" class="hidden cursor-pointer hover:bg-slate-200 transition rounded-lg p-2 border border-slate-200 bg-white flex items-center gap-2" onclick="abrirModalEvidenciaAnalista()">
+                            <i class="fa-solid fa-image text-red-600 text-xl"></i>
+                            <div class="text-xs text-slate-600 line-clamp-2 flex-1" id="ana-comentario-preview">
+                                Sin comentarios adicionales.
+                            </div>
                         </div>
+                        <div id="ana-sin-comentario" class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200">
+                            Sin comentarios adicionales.
+                        </div>
+
                         <button id="btn-finalizar-atencion" onclick="finalizarAtencionAnalista()" class="hidden w-full mt-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs md:text-sm transition">
                             <i class="fa-solid fa-check-circle mr-1"></i> Finalizar Atención
                         </button>
                     </div>
-                </div>
-                <div class="mt-4 md:mt-6 border-t border-slate-100 pt-3 md:pt-4">
-                    <h3 class="text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-1"></i> Mis atenciones de la semana</h3>
-                    <div class="h-40 md:h-48 w-full max-w-sm mx-auto"><canvas id="chart-analista-semana"></canvas></div>
                 </div>
             </div>
 
@@ -374,28 +408,35 @@
                     <i class="fa-solid fa-display text-emerald-600"></i> MÓDULOS
                 </h2>
                 <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
+                    <!-- BOTÓN DE PANTALLA COMPLETA -->
                     <button onclick="toggleFullScreen()" id="btn-fullscreen" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-bold transition flex items-center gap-1 md:gap-2 shadow-sm border border-slate-300 text-xs md:text-sm" title="Pantalla Completa">
                         <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Pantalla Completa</span>
                     </button>
                     
-                    <!-- Reloj para TV -->
-                    <div class="bg-slate-900 text-emerald-400 px-4 py-1.5 md:px-8 md:py-3 rounded-lg md:rounded-2xl font-mono font-black text-xl md:text-5xl tracking-widest border-2 md:border-4 border-slate-700 shadow-2xl" id="live-clock">--:--:--</div>
+                    <!-- Reloj para TV (Solo para Operadores/Admin) -->
+                    <div id="reloj-tv" class="bg-slate-900 text-emerald-400 px-4 py-1.5 md:px-8 md:py-3 rounded-lg md:rounded-2xl font-mono font-black text-xl md:text-5xl tracking-widest border-2 md:border-4 border-slate-700 shadow-2xl">--:--:--</div>
                 </div>
             </div>
             
             <!-- Tarjetas Módulos -->
             <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
 
-            <!-- GRÁFICAS GLOBALES -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mt-6 md:mt-8">
-                <div class="chart-card">
-                    <div class="chart-title"><i class="fa-solid fa-chart-simple text-red-600"></i> CARGA: REQ. VS INC.</div>
-                    <div class="chart-canvas-wrap"><canvas id="chart-barras-global"></canvas></div>
+            <!-- TABLA DE RANKING -->
+            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-800"><i class="fa-solid fa-ranking-star text-red-600 mr-2"></i> RANKING DE ATENCIONES</h3>
+                    <span class="text-[10px] md:text-xs font-bold text-slate-500 bg-white border px-3 py-1 rounded-full">Estadísticas en Vivo</span>
                 </div>
-                <div class="chart-card">
-                    <div class="chart-title"><i class="fa-solid fa-chart-pie text-red-600"></i> DISTRIBUCIÓN GLOBAL</div>
-                    <div class="chart-canvas-wrap"><canvas id="chart-dona-global"></canvas></div>
-                </div>
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px; text-align: center;"># RANKING</th>
+                            <th>ANALISTA SOPORTE</th>
+                            <th style="width: 40%;">PROGRESO TOTAL DE ATENCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ranking"></tbody>
+                </table>
             </div>
         </div>
 
@@ -425,7 +466,7 @@
             </div>
         </div>
 
-        <!-- VIEW: USUARIOS -->
+        <!-- VIEW: USUARIOS (CON COLUMNA ELIMINAR) -->
         <div id="view-usuarios" class="space-y-4 md:space-y-6 w-full hidden">
             <div class="bg-white rounded-xl md:rounded-3xl p-4 md:p-8 shadow-xl">
                 <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b">
@@ -446,7 +487,16 @@
                 </div>
                 <div class="overflow-x-auto border rounded-lg md:rounded-xl">
                     <table class="min-w-full">
-                        <thead><tr><th>USUARIO</th><th>NOMBRE</th><th>ROL</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>USUARIO</th>
+                                <th>NOMBRE</th>
+                                <th>ROL</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                                <th style="text-align: center;">ELIMINAR</th>
+                            </tr>
+                        </thead>
                         <tbody id="tabla-usuarios"></tbody>
                     </table>
                 </div>
@@ -475,9 +525,7 @@
         <div class="chat-footer">
             <img id="chat-photo-preview" class="hidden max-h-16 rounded-lg mb-2 border-2 border-red-600">
             <div class="chat-input-wrap">
-                <!-- Menú de menciones -->
                 <div id="mention-menu"></div>
-                <!-- Menú de Emojis -->
                 <div id="emoji-picker"></div>
                 
                 <button onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-yellow-500 px-1 pb-1 transition"><i class="fa-regular fa-face-smile text-xl"></i></button>
@@ -505,7 +553,7 @@
         let usuarioCambiandoPass = null;
         let timerInterval = null;
         
-        let chartBarras = null, chartDona = null, chartAnalista = null;
+        let chartBarras = null, chartDona = null; // Ya no se usa chartAnalista
 
         const AVATAR_COLORS = ['#C5221F','#059669','#2563eb','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
         function colorAvatar(nombre) { let h = 0; for (let i = 0; i < nombre.length; i++) h = nombre.charCodeAt(i) + ((h << 5) - h); return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]; }
@@ -514,7 +562,6 @@
         window.addEventListener('firebaseReady', () => {
             firebaseListo = true;
             iniciarEscuchasFirebase();
-            if ("Notification" in window && Notification.permission !== "granted") { Notification.requestPermission(); }
         });
 
         function mostrarToast(msg, tipo = 'success') {
@@ -537,7 +584,51 @@
         function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
 
         /* ============================================
-           LOGIN Y CONTRASEÑA
+           AUDIO Y NOTIFICACIONES EN MÓVILES
+           ============================================ */
+        function activarAudioMovil() {
+            if ('speechSynthesis' in window) {
+                const m = new SpeechSynthesisUtterance("Alertas activadas");
+                m.volume = 0;
+                window.speechSynthesis.speak(m);
+            }
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+            document.getElementById('audio-activation-banner').classList.add('hidden');
+            mostrarToast('🔊 Alertas de audio y ventanas emergentes activadas.', 'success');
+        }
+
+        function reproducirAlertaTicket(detalle) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
+                m.lang='es-PE'; m.rate=1.0; m.volume=1.0;
+                setTimeout(() => window.speechSynthesis.speak(m), 300);
+            }
+        }
+
+        function enviarNotificacionPush(titulo, cuerpo) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titulo, {
+                    body: cuerpo,
+                    icon: "logo.png"
+                });
+            }
+        }
+
+        function mostrarAlertaCentral(ticket) {
+            document.getElementById('central-alert-text').textContent = ticket;
+            document.getElementById('central-alert').classList.add('show');
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+
+        function cerrarAlertaCentral() {
+            document.getElementById('central-alert').classList.remove('show');
+        }
+
+        /* ============================================
+           LOGIN Y SESIÓN
            ============================================ */
         function togglePasswordVisibility() {
             const input = document.getElementById('login-pass');
@@ -569,7 +660,7 @@
                 return;
             }
             sesionActual = { user, ...usuariosData[user] };
-            sessionStorage.setItem('ogti_session_v16', JSON.stringify(sesionActual));
+            sessionStorage.setItem('ogti_session_v19', JSON.stringify(sesionActual));
             iniciarSesionUI();
         }
 
@@ -585,13 +676,13 @@
             window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
                 usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
                 sesionActual = { user, ...usuariosData[user] };
-                sessionStorage.setItem('ogti_session_v16', JSON.stringify(sesionActual));
+                sessionStorage.setItem('ogti_session_v19', JSON.stringify(sesionActual));
                 iniciarSesionUI();
             });
         }
 
-        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v16'); location.reload(); }
-        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v16'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
+        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v19'); location.reload(); }
+        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v19'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
 
         function iniciarSesionUI() {
             if (!sesionActual) return;
@@ -618,9 +709,15 @@
             
             if (rol === 'analista') {
                 document.getElementById('analista-dashboard').classList.remove('hidden');
+                // Ocultar reloj y botón de pantalla completa para analistas
+                document.getElementById('reloj-tv').classList.add('hidden');
+                document.getElementById('btn-fullscreen').classList.add('hidden');
                 renderAnalistaDashboard();
+                document.getElementById('audio-activation-banner').classList.remove('hidden');
             } else {
                 document.getElementById('analista-dashboard').classList.add('hidden');
+                document.getElementById('reloj-tv').classList.remove('hidden');
+                document.getElementById('btn-fullscreen').classList.remove('hidden');
             }
             
             switchView('ranking');
@@ -628,7 +725,7 @@
         }
 
         /* ============================================
-           FIREBASE Y LOGICA DE ANALISTAS
+           FIREBASE
            ============================================ */
         function iniciarEscuchasFirebase() {
             const usersRef = window.firebaseRef(window.firebaseDB, 'usuarios');
@@ -643,7 +740,19 @@
             window.firebaseOnValue(analistasRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
+                    const antes = JSON.parse(JSON.stringify(analistasData));
                     analistasData = Object.values(data).sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    
+                    if (sesionActual && sesionActual.rol === 'analista') {
+                        const yoAntes = antes.find(x => x.nombre === sesionActual.nombre);
+                        const yoAhora = analistasData.find(x => x.nombre === sesionActual.nombre);
+                        
+                        if (yoAhora && yoAhora.estado === 'ocupado' && (!yoAntes || yoAntes.ticket !== yoAhora.ticket)) {
+                            reproducirAlertaTicket(`${yoAhora.ticket}`);
+                            enviarNotificacionPush("¡Nueva Atención!", `Ticket ${yoAhora.ticket}`);
+                            mostrarAlertaCentral(yoAhora.ticket);
+                        }
+                    }
                 } else {
                     const LISTA = ["Mijael Rivera", "Manuel Rivera", "Carlos Farro", "Rocky Antizana", "Alonso Venegas", "Hernand de la Cruz", "Carlitos Hidalgo"];
                     analistasData = LISTA.map((n, i) => ({ id: i+1, nombre: n, estado: 'libre', ticket: '-', foto: null, comentario: '', startTime: null, totalR: 0, totalI: 0 }));
@@ -682,6 +791,7 @@
             });
         }
 
+        // Renderiza la info exclusiva del analista
         function renderAnalistaDashboard() {
             if (sesionActual?.rol !== 'analista') return;
             const nombre = sesionActual.nombre;
@@ -691,51 +801,53 @@
             document.getElementById('ana-initial').textContent = nombre.charAt(0).toUpperCase();
             
             const btnFinalizar = document.getElementById('btn-finalizar-atencion');
-            const txtComentario = document.getElementById('ana-comentario');
             const txtFecha = document.getElementById('ana-fecha');
             const txtTicket = document.getElementById('ana-ticket');
+            const boxEvidencia = document.getElementById('ana-evidencia-box');
+            const txtComentarioPreview = document.getElementById('ana-comentario-preview');
+            const txtSinComentario = document.getElementById('ana-sin-comentario');
 
             if (a) {
                 if (a.estado === 'ocupado') {
                     txtTicket.textContent = a.ticket;
-                    txtTicket.className = 'text-xl md:text-2xl font-mono font-extrabold text-red-600';
+                    txtTicket.className = 'text-2xl md:text-3xl font-mono font-extrabold text-red-600';
                     
                     if (a.startTime) txtFecha.textContent = new Date(a.startTime).toLocaleString('es-PE');
                     else txtFecha.textContent = '-';
                     
-                    txtComentario.textContent = a.comentario || 'Sin comentarios adicionales.';
+                    if (a.foto || a.comentario) {
+                        boxEvidencia.classList.remove('hidden');
+                        txtSinComentario.classList.add('hidden');
+                        txtComentarioPreview.textContent = a.comentario || 'Ver imagen adjunta';
+                        window.tempEvidencia = { foto: a.foto, comentario: a.comentario, ticket: a.ticket };
+                    } else {
+                        boxEvidencia.classList.add('hidden');
+                        txtSinComentario.classList.remove('hidden');
+                        txtSinComentario.textContent = 'Sin comentarios adicionales.';
+                    }
+
                     btnFinalizar.classList.remove('hidden');
                 } else {
                     txtTicket.textContent = a.estado === 'vacaciones' ? 'VACACIONES' : 'LIBRE';
-                    txtTicket.className = 'text-xl md:text-2xl font-mono font-extrabold text-emerald-600';
+                    txtTicket.className = 'text-2xl md:text-3xl font-mono font-extrabold text-emerald-600';
                     txtFecha.textContent = '-';
-                    txtComentario.textContent = 'No tienes atención asignada.';
+                    boxEvidencia.classList.add('hidden');
+                    txtSinComentario.classList.remove('hidden');
+                    txtSinComentario.textContent = 'No tienes atención asignada.';
                     btnFinalizar.classList.add('hidden');
                 }
             }
+        }
 
-            const ctx = document.getElementById('chart-analista-semana');
-            if (!ctx) return;
-            
-            let reqs = 0, incs = 0;
-            const hace7dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            
-            historialData.forEach(h => {
-                if (h.nombre === nombre && h.evento === 'apertura' && new Date(h.fecha).getTime() >= hace7dias) {
-                    if (h.ticket.startsWith('I-')) incs++;
-                    else reqs++;
+        function abrirModalEvidenciaAnalista() {
+            if (window.tempEvidencia && (window.tempEvidencia.foto || window.tempEvidencia.comentario)) {
+                let titulo = `Ticket: ${window.tempEvidencia.ticket}\nComentario: ${window.tempEvidencia.comentario || 'Sin comentario'}`;
+                if (window.tempEvidencia.foto) {
+                    abrirModalFoto(window.tempEvidencia.foto, titulo);
+                } else {
+                    alert(titulo);
                 }
-            });
-
-            if (chartAnalista) chartAnalista.destroy();
-            chartAnalista = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Req (R)', 'Inc (I)'],
-                    datasets: [{ data: [reqs, incs], backgroundColor: ['#059669', '#C5221F'], borderWidth: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
-            });
+            }
         }
 
         async function finalizarAtencionAnalista() {
@@ -759,8 +871,30 @@
             renderAnalistaDashboard();
         }
 
+        function iniciarReloj() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const el = document.getElementById('reloj-tv');
+                if (el && !el.classList.contains('hidden')) el.textContent = new Date().toLocaleTimeString('es-PE');
+                actualizarTiemposVista();
+            }, 1000);
+        }
+
+        function switchView(v) {
+            if (!sesionActual) return;
+            if (sesionActual.rol === 'analista' && v !== 'ranking') { v = 'ranking'; }
+            
+            ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
+            document.getElementById(`view-${v}`).classList.remove('hidden');
+            
+            if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
+            else if (v === 'ranking') { renderRankingYModulos(); if (sesionActual.rol === 'analista') renderAnalistaDashboard(); }
+            else if (v === 'historial') renderHistorial();
+            else if (v === 'usuarios') renderTablaUsuarios();
+        }
+
         /* ============================================
-           OPERADOR Y ALERTAS
+           OPERADOR Y EVIDENCIA
            ============================================ */
         function poblarSelectAnalistas() {
             const s = document.getElementById('op-nombre');
@@ -899,30 +1033,10 @@
             historialData.unshift(nuevoHistorial);
             await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
             
-            // ALERTA SONORA Y NOTIFICACIÓN
-            reproducirAlertaTicket(`${ticketSel} para ${nombreSel}`);
             enviarNotificacionPush("Nueva Atención OGTI", `Ticket ${ticketSel} asignado a ${nombreSel}`);
             
             mostrarToast(`Atención asignada a ${nombreSel} (${ticketSel})`, 'success');
             limpiarFormularioTicket();
-        }
-
-        function reproducirAlertaTicket(detalle) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
-                m.lang='es-PE'; m.rate=1.05; m.volume=1; // Volumen al máximo
-                setTimeout(() => window.speechSynthesis.speak(m), 300);
-            }
-        }
-
-        function enviarNotificacionPush(titulo, cuerpo) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(titulo, {
-                    body: cuerpo,
-                    icon: "logo.png" // Usa tu logo local
-                });
-            }
         }
 
         /* ============================================
@@ -1055,55 +1169,37 @@
             g.innerHTML = html;
             actualizarTiemposVista();
             
-            renderGraficasGlobales();
+            renderTablaRanking();
         }
 
-        function renderGraficasGlobales() {
-            const nombres = analistasData.map(a => a.nombre);
-            const reqs = analistasData.map(a => a.totalR || 0);
-            const incs = analistasData.map(a => a.totalI || 0);
+        function renderTablaRanking() {
+            const tb = document.getElementById('tabla-ranking');
+            if (!tb) return;
+            
+            const ord = [...analistasData].sort((a,b) => (b.totalR+b.totalI)-(a.totalR+a.totalI));
+            const maxT = Math.max(...ord.map(a => (a.totalR||0)+(a.totalI||0)), 1);
+            let rows = '';
+            
+            ord.forEach((a,i) => {
+                const total = (a.totalR||0)+(a.totalI||0);
+                const pct = Math.round((total/maxT)*100);
+                let medal = `<span class="text-slate-500 font-bold text-sm md:text-base">#${i+1}</span>`;
+                if (i===0) medal = '<span class="text-xl md:text-2xl">🥇</span>';
+                if (i===1) medal = '<span class="text-xl md:text-2xl">🥈</span>';
+                if (i===2) medal = '<span class="text-xl md:text-2xl">🥉</span>';
 
-            const ctxBarras = document.getElementById('chart-barras-global');
-            if (ctxBarras) {
-                if (chartBarras) chartBarras.destroy();
-                chartBarras = new Chart(ctxBarras, {
-                    type: 'bar',
-                    data: {
-                        labels: nombres,
-                        datasets: [
-                            { label: 'Req (R)', data: reqs, backgroundColor: '#059669', borderRadius: 4 },
-                            { label: 'Inc (I)', data: incs, backgroundColor: '#dc2626', borderRadius: 4 }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } },
-                        scales: { y: { beginAtZero: true, ticks: { stepSize: 2, font: {size: 10} } }, x: { grid: { display: false }, ticks: {font: {size: 9}} } }
-                    }
-                });
-            }
-
-            const totalReq = reqs.reduce((a, b) => a + b, 0);
-            const totalInc = incs.reduce((a, b) => a + b, 0);
-            const ctxDona = document.getElementById('chart-dona-global');
-            if (ctxDona) {
-                if (chartDona) chartDona.destroy();
-                chartDona = new Chart(ctxDona, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Req (R)', 'Inc (I)'],
-                        datasets: [{
-                            data: [totalReq, totalInc],
-                            backgroundColor: ['#059669', '#dc2626'],
-                            borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false, cutout: '65%',
-                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } }
-                    }
-                });
-            }
+                rows += `<tr>
+                    <td style="text-align:center;">${medal}</td>
+                    <td class="font-bold text-slate-800 text-xs md:text-sm">${escapeHtml(a.nombre)}</td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-text text-xs md:text-sm">${total}<br><span class="progress-pct text-[10px] md:text-xs">(${pct}%)</span></div>
+                            <div class="bar-bg h-2 md:h-3"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            if (tb) tb.innerHTML = rows;
         }
 
         function renderHistorial() {
@@ -1137,7 +1233,7 @@
         }
 
         /* ============================================
-           USUARIOS
+           USUARIOS (CON ELIMINAR)
            ============================================ */
         function crearUsuario() {
             if (sesionActual.rol !== 'admin') return;
@@ -1168,6 +1264,16 @@
             window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: '123456', debeCambiar: true }).then(() => mostrarToast('Contraseña reseteada.', 'info'));
         }
 
+        function eliminarUsuario(user) {
+            if (sesionActual.rol !== 'admin') return;
+            if (user === 'admin') { mostrarToast('No puedes eliminar al administrador principal.', 'error'); return; }
+            if (!confirm(`¿Estás seguro de eliminar al usuario ${user}? No podrá volver a iniciar sesión.`)) return;
+            
+            window.firebaseRemove(window.firebaseRef(window.firebaseDB, `usuarios/${user}`)).then(() => {
+                mostrarToast(`Usuario ${user} eliminado correctamente.`, 'success');
+            });
+        }
+
         function renderTablaUsuarios() {
             const tb = document.getElementById('tabla-usuarios');
             if (!tb) return;
@@ -1190,14 +1296,17 @@
                     <td class="text-xs md:text-sm">${escapeHtml(u.nombre)}</td>
                     <td>${u.user === 'admin' ? `<span class="px-1 py-0.5 rounded text-[10px] md:text-xs font-bold ${rolColor}">${u.rol.toUpperCase()}</span>` : selectRol}</td>
                     <td class="font-mono text-slate-400 text-[10px] md:text-xs">${u.debeCambiar ? 'Cambio pendiente' : '••••••••'}</td>
-                    <td><button onclick="resetearPassword('${u.user}')" class="text-red-500 hover:text-red-700 text-xs md:text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
+                    <td><button onclick="resetearPassword('${u.user}')" class="text-amber-500 hover:text-amber-700 text-xs md:text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
+                    <td style="text-align:center;">
+                        ${u.user === 'admin' ? '<span class="text-slate-300"><i class="fa-solid fa-lock"></i></span>' : `<button onclick="eliminarUsuario('${u.user}')" class="text-red-500 hover:text-red-700 text-sm md:text-base font-bold"><i class="fa-solid fa-trash-can"></i></button>`}
+                    </td>
                 </tr>`;
             });
             tb.innerHTML = html;
         }
 
         /* ============================================
-           CHAT CON EMOJIS Y MENCIONES
+           CHAT MULTIUSUARIO
            ============================================ */
         function toggleEmojiPicker() {
             const picker = document.getElementById('emoji-picker');
@@ -1376,7 +1485,7 @@
         });
 
         /* ============================================
-           PANTALLA COMPLETA Y RELOJ
+           PANTALLA COMPLETA
            ============================================ */
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
@@ -1401,28 +1510,6 @@
                 document.getElementById('main-header').style.position = 'sticky';
             }
         });
-
-        function iniciarReloj() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const el = document.getElementById('live-clock');
-                if (el) el.textContent = new Date().toLocaleTimeString('es-PE');
-                actualizarTiemposVista();
-            }, 1000);
-        }
-
-        function switchView(v) {
-            if (!sesionActual) return;
-            if (sesionActual.rol === 'analista' && v !== 'ranking') { v = 'ranking'; }
-            
-            ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
-            document.getElementById(`view-${v}`).classList.remove('hidden');
-            
-            if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
-            else if (v === 'ranking') { renderRankingYModulos(); if (sesionActual.rol === 'analista') renderAnalistaDashboard(); }
-            else if (v === 'historial') renderHistorial();
-            else if (v === 'usuarios') renderTablaUsuarios();
-        }
 
         document.addEventListener('DOMContentLoaded', () => {
             verificarSesionAlCargar();
