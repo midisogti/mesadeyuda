@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OGTI v7.0 - Control de atenciones (Tiempo Real)</title>
+    <title>OGTI v11.0 - Control de atenciones (Integral)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- 1. SDK DE FIREBASE -->
+    <!-- CONFIGURACIÓN FIREBASE -->
     <script type="module">
-        // Importar Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, query, limitToLast, get, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // ==========================================
-        // 2. CONFIGURACIÓN DE FIREBASE (REEMPLAZA ESTO)
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyB87OkfEp59VqEmq-qfc8kMYxuPjqqvWXg",
             authDomain: "ogti-midis.firebaseapp.com",
@@ -28,12 +24,9 @@
             appId: "1:895881149853:web:265c01702c00eeb4cd0374"
         };
 
-
-        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // Hacer funciones accesibles globalmente para el HTML
         window.firebaseDB = db;
         window.firebaseRef = ref;
         window.firebaseOnValue = onValue;
@@ -41,6 +34,8 @@
         window.firebasePush = push;
         window.firebaseQuery = query;
         window.firebaseLimitToLast = limitToLast;
+        window.firebaseGet = get;
+        window.firebaseUpdate = update;
         
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
@@ -49,62 +44,82 @@
         tailwind.config = { theme: { extend: { colors: { midisRedPrimary: '#C5221F', midisGreenAccent: '#059669' } } } }
     </script>
     <style>
-        /* ... (Mismos estilos de la v6.0) ... */
         * { font-family: 'Inter', sans-serif; }
-        :root { --bg-body: #f4f7f9; --card-bg: #ffffff; --text-dark: #0f172a; --header-bg: #1e293b; --red-primary: #e11d48; --green-primary: #059669; --shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+        :root { --bg-body: #f4f7f9; --card-bg: #ffffff; --header-bg: #0f172a; --red-primary: #e11d48; --green-primary: #059669; }
         body { background-color: var(--bg-body); margin: 0; padding: 0; }
         .full-screen-wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; padding: 24px; }
-        .card-analyst { background: var(--card-bg); border-radius: 20px; padding: 28px; box-shadow: var(--shadow); transition: transform 0.2s; }
-        .card-analyst:hover { transform: translateY(-4px); }
-        .card-analyst.available { border: 2px solid #81C995; background: linear-gradient(to bottom, #FFFFFF, #F1F8F5); }
-        .card-analyst.available .status-badge { background-color: #E6F4EA; color: #137333; }
-        .card-analyst.available .main-action { background: linear-gradient(135deg, #E6F4EA 0%, #CEEAD6 100%); color: #137333; border: 1px solid #81C995; }
-        .card-analyst.busy { border: 2px solid #FAD2CF; background: linear-gradient(to bottom, #FFFFFF, #FDF7F7); }
-        .card-analyst.busy .status-badge { background-color: #FCE8E6; color: #C5221F; }
-        .card-analyst.busy .main-action { background: linear-gradient(135deg, #EA4335 0%, #C5221F 100%); color: white; border: none; cursor: pointer; }
-        .status-badge { font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 30px; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; }
-        .status-badge::before { content: ''; display: block; width: 10px; height: 10px; border-radius: 50%; background-color: currentColor; }
-        .main-action { width: 100%; padding: 24px; border-radius: 16px; text-align: center; font-weight: 800; font-size: 1.6rem; display: flex; justify-content: center; align-items: center; height: 80px; margin-bottom: 20px; }
-        .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 0.95rem; font-weight: 700; }
-        .status-pill::before { content: ''; display: block; width: 10px; height: 10px; border-radius: 50%; }
+        
+        /* Animaciones de luces */
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+        .dot-red { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; animation: pulse-red 1.5s infinite; }
+        .dot-green { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; }
+
+        /* Tablas Generales */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background-color: var(--header-bg); color: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 16px 24px; }
+        td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 0.95rem; vertical-align: middle; background: white; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        /* Pills de Estado */
+        .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .status-free { background-color: #dcfce7; color: #166534; }
-        .status-free::before { background-color: #22c55e; animation: pulse-green 2s infinite; }
         .status-busy { background-color: #fee2e2; color: #991b1b; }
-        .status-busy::before { background-color: #ef4444; animation: pulse-red 1.2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 70% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
-        .time-badge-custom { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 1rem; }
+
+        /* Barras de progreso */
+        .progress-wrapper { display: flex; align-items: center; gap: 12px; }
+        .progress-text { font-weight: 800; font-size: 0.9rem; color: #0f172a; line-height: 1.1; }
+        .progress-pct { font-size: 0.7rem; color: #64748b; font-weight: 600; }
+        .bar-bg { flex-grow: 1; background-color: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); border-radius: 10px; }
+
+        /* Badges de tiempo */
+        .time-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
         .time-warning { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
         .time-normal { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background-color: var(--header-bg); color: #f8fafc; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; padding: 20px 24px; }
-        td { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; color: var(--text-dark); font-size: 1.05rem; }
-        .col-progress { width: 35%; }
-        .progress-wrapper { display: flex; align-items: center; gap: 16px; }
-        .bar-container { flex-grow: 1; background-color: #f1f5f9; height: 14px; border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); border-radius: 10px; transition: width 1s; }
-        .chart-card { background: white; border-radius: 20px; padding: 24px; box-shadow: var(--shadow); }
-        .chart-canvas-wrap { position: relative; height: 280px; }
+
+        /* Tarjetas Módulos */
+        .card-analyst { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; }
+        .card-analyst.available { border-color: #bbf7d0; background: linear-gradient(to bottom, #ffffff, #f0fdf4); }
+        .card-analyst.busy { border-color: #fecaca; background: linear-gradient(to bottom, #ffffff, #fef2f2); }
+        .main-action { width: 100%; padding: 20px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
+        .card-analyst.available .main-action { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .card-analyst.busy .main-action { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+
+        /* Login y Modales */
         #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; }
         #login-card { background: white; border-radius: 24px; padding: 40px; max-width: 420px; width: 90%; }
-        #chat-fab { position: fixed; bottom: 24px; right: 24px; z-index: 400; width: 64px; height: 64px; border-radius: 50%; background: #C5221F; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; }
-        #chat-panel { position: fixed; bottom: 24px; right: 24px; z-index: 450; width: 380px; height: 550px; background: white; border-radius: 20px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; }
+        
+        .tooltip-img { position: relative; cursor: pointer; }
+        .tooltip-img .tooltip-content { visibility: hidden; position: absolute; z-index: 100; bottom: 120%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 12px; border: 3px solid white; background: white; padding: 4px; }
+        .tooltip-img:hover .tooltip-content { visibility: visible; opacity: 1; }
+        .tooltip-img .tooltip-content img { width: 180px; height: auto; border-radius: 8px; }
+
+        /* CHAT STYLES */
+        #chat-fab { position: fixed; bottom: 24px; right: 24px; z-index: 400; width: 60px; height: 60px; border-radius: 50%; background: #C5221F; color: white; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: 0 10px 25px rgba(197,34,31,0.4); transition: transform 0.2s; }
+        #chat-fab:hover { transform: scale(1.1); }
+        #chat-panel { position: fixed; bottom: 24px; right: 24px; z-index: 450; width: 380px; height: 550px; background: white; border-radius: 20px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; }
         #chat-panel.show { display: flex; }
-        .chat-header { background: #C5221F; color: white; padding: 16px; display: flex; justify-content: space-between; }
+        .chat-header { background: #C5221F; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
         .chat-body { flex: 1; overflow-y: auto; padding: 16px; background: #f8fafc; }
-        .chat-footer { padding: 12px; display: flex; gap: 8px; border-top: 1px solid #e2e8f0; }
-        .chat-input { flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px; resize: none; }
-        .chat-send { background: #C5221F; color: white; border-radius: 12px; padding: 10px 16px; cursor: pointer; }
-        .chat-msg { margin-bottom: 12px; display: flex; gap: 8px; }
+        .chat-footer { padding: 12px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #e2e8f0; background: white; }
+        .chat-input-wrap { display: flex; gap: 8px; align-items: flex-end; position: relative; }
+        .chat-input { flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px; resize: none; font-family: inherit; max-height: 100px; outline: none; font-size: 0.9rem; }
+        .chat-send { background: #C5221F; color: white; border-radius: 12px; padding: 10px 16px; cursor: pointer; border: none; font-weight: bold; }
+        .chat-msg { margin-bottom: 12px; display: flex; gap: 8px; animation: msgIn 0.3s; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .chat-msg.mine { flex-direction: row-reverse; }
-        .chat-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; }
-        .chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; }
+        .chat-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; flex-shrink: 0; font-size: 0.8rem; }
+        .chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 0.85rem; word-wrap: break-word; }
         .chat-msg.mine .chat-bubble { background: #C5221F; color: white; border-bottom-right-radius: 4px; }
-        .chat-msg:not(.mine) .chat-bubble { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
-        .chat-time { font-size: 0.65rem; opacity: 0.6; margin-top: 2px; }
-        #chat-notification { position: fixed; top: 90px; right: 24px; z-index: 500; background: white; border-radius: 16px; padding: 14px; display: flex; gap: 12px; border-left: 4px solid #C5221F; transform: translateX(120%); transition: transform 0.4s; }
-        #chat-notification.show { transform: translateX(0); }
+        .chat-msg:not(.mine) .chat-bubble { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; color: #0f172a; }
+        .chat-time { font-size: 0.6rem; opacity: 0.6; margin-top: 4px; display: block; }
+        .mention { background: rgba(255,255,255,0.3); font-weight: bold; padding: 2px 6px; border-radius: 4px; margin: 0 2px; }
+        .chat-msg:not(.mine) .mention { background: #dcfce7; color: #166534; }
+        #mention-menu { position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 200px; max-height: 150px; overflow-y: auto; display: none; z-index: 500; margin-bottom: 8px; }
+        #mention-menu.show { display: block; }
+        .mention-item { padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid #f1f5f9; }
+        .mention-item:hover { background: #f1f5f9; color: #C5221F; }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -113,142 +128,235 @@
     <!-- LOGIN -->
     <div id="login-screen">
         <div id="login-card">
-            <div class="text-center mb-8">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="MIDIS" class="h-12 mx-auto mb-4" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'">
-                <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control de Atenciones</h1>
-                <p class="text-sm text-slate-500 mt-1">Mesa de Ayuda · v7.0 (Tiempo Real)</p>
+            <div id="login-form-area">
+                <div class="text-center mb-8">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="MIDIS" class="h-12 mx-auto mb-4" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'">
+                    <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
+                    <p class="text-sm text-slate-500 mt-1">v11.0 - Gestión de Mesa de Ayuda</p>
+                </div>
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Usuario</label><input type="text" id="login-user" placeholder="Ej. admin" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
+                    <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Ingresar</button>
+                    <div class="text-xs text-slate-500 text-center pt-3 border-t border-slate-100">
+                        <div>Admin inicial: <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin</span> / <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin123</span></div>
+                    </div>
+                </div>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Usuario</label>
-                    <input type="text" id="login-user" placeholder="admin / viewer" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600">
+
+            <div id="change-pass-area" class="hidden">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h2 class="text-xl font-extrabold text-slate-900">Cambio de Contraseña</h2>
+                    <p class="text-sm text-slate-500 mt-1">Por seguridad, debes cambiar tu contraseña.</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
-                    <input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600">
-                </div>
-                <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
-                <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Ingresar</button>
-                <div class="text-xs text-slate-500 text-center pt-3 border-t border-slate-100">
-                    <div><span class="font-mono bg-red-50 text-red-700 px-2 py-0.5 rounded">admin</span> / <span class="font-mono bg-red-50 text-red-700 px-2 py-0.5 rounded">admin123</span> (Operador)</div>
-                    <div><span class="font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded">viewer</span> / <span class="font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded">viewer123</span> (Analista)</div>
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Nueva Contraseña</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label><input type="password" id="confirm-pass" placeholder="Repite la contraseña" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div id="change-pass-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
+                    <button onclick="guardarNuevaPassword()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Guardar y Entrar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- BANNER NUEVO TICKET -->
-    <div id="new-ticket-banner" class="fixed top-24 left-1/2 transform -translate-x-1/2 -translate-y-48 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl z-50 transition-transform duration-500 flex items-center gap-4">
-        <i class="fa-solid fa-bell text-2xl animate-bounce"></i>
-        <div>
-            <div class="text-xs uppercase tracking-wider opacity-90">Nuevo ticket asignado</div>
-            <div id="new-ticket-text" class="font-bold">—</div>
+    <!-- MODALES Y TOASTS -->
+    <div id="photo-modal" class="fixed inset-0 bg-black/80 z-[999] hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
+        <div class="bg-white p-4 rounded-2xl max-w-3xl max-h-[90vh] overflow-auto relative" onclick="event.stopPropagation()">
+            <button onclick="cerrarModalFoto()" class="absolute top-3 right-3 text-slate-500 hover:text-red-600 text-2xl font-bold bg-white/80 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-foto-title" class="text-base font-bold text-slate-800 mb-3 hidden"></h3>
+            <img id="modal-img-element" src="" alt="Evidencia" class="w-full h-auto rounded-xl object-contain">
         </div>
     </div>
-
-    <!-- NOTIFICACIÓN MENSAJE CHAT -->
-    <div id="chat-notification">
-        <div id="chat-notif-avatar" class="chat-avatar" style="background:#C5221F;">?</div>
-        <div class="flex-1">
-            <div id="chat-notif-name" class="font-extrabold text-sm text-slate-900"></div>
-            <div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div>
-        </div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[1000] flex flex-col gap-2"></div>
+    
+    <!-- NOTIFICACIÓN CHAT -->
+    <div id="chat-notification" class="fixed top-24 right-6 z-[500] bg-white rounded-2xl p-4 flex gap-3 border-l-4 border-red-600 shadow-2xl transform translate-x-[150%] transition-transform duration-300 cursor-pointer" onclick="toggleChatPanel()">
+        <div id="chat-notif-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-red-600">?</div>
+        <div><div id="chat-notif-name" class="font-bold text-sm text-slate-900"></div><div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div></div>
     </div>
 
     <!-- HEADER -->
-    <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 transition-all duration-300 hidden">
+    <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 hidden">
         <div class="w-full px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-4">
-                <div class="bg-white p-2 rounded-2xl shadow-md"><img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="Logo" class="h-11" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'"></div>
-                <div>
-                    <h1 class="text-lg md:text-2xl font-extrabold text-white">OGTI - Control de atenciones <span class="text-xs bg-black/20 px-3 py-1 rounded-full uppercase">v7.0</span></h1>
-                </div>
+                <div class="bg-white p-2 rounded-2xl shadow-md"><img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="Logo" class="h-10" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'"></div>
+                <div><h1 class="text-lg md:text-2xl font-extrabold text-white">OGTI Control <span class="text-xs bg-black/20 px-3 py-1 rounded-full uppercase">v11.0</span></h1></div>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <div id="user-info" class="hidden flex items-center gap-2 bg-black/20 border border-white/20 rounded-xl px-3 py-2">
                     <i class="fa-solid fa-user-circle text-lg"></i>
-                    <div class="text-xs">
-                        <div id="user-name-display" class="font-bold"></div>
-                        <div id="user-role-display" class="text-[10px] text-red-200 uppercase"></div>
-                    </div>
+                    <div class="text-xs"><div id="user-name-display" class="font-bold"></div><div id="user-role-display" class="text-[10px] text-red-200 uppercase"></div></div>
                 </div>
-                <button onclick="switchView('operador')" id="btn-op" class="hidden px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-headset mr-2"></i> Panel Operador</button>
-                <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-chart-column mr-2"></i> Módulos</button>
-                <button onclick="switchView('historial')" id="btn-hist" class="hidden px-5 py-2.5 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Historial</button>
-                <button onclick="cerrarSesion()" id="btn-logout" class="hidden px-4 py-2.5 bg-black/40 hover:bg-black/60 text-white rounded-xl font-bold text-sm"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+                <button onclick="switchView('operador')" id="btn-op" class="hidden px-4 py-2 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-headset mr-2"></i> Panel Operador</button>
+                <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-4 py-2 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-chart-column mr-2"></i> Módulos y Ranking</button>
+                <button onclick="switchView('historial')" id="btn-hist" class="hidden px-4 py-2 text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Historial</button>
+                <button onclick="switchView('usuarios')" id="btn-users" class="hidden px-4 py-2 text-sm font-bold rounded-xl bg-amber-500/80 hover:bg-amber-500 text-white"><i class="fa-solid fa-users-gear mr-2"></i> Usuarios</button>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden px-3 py-2 bg-black/40 hover:bg-black/60 text-white rounded-xl font-bold text-sm"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </div>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main id="main-content" class="full-screen-wrapper w-full flex-grow hidden">
-        <!-- PANEL OPERADOR -->
+        
+        <!-- VIEW: OPERADOR -->
         <div id="view-operador" class="space-y-6 w-full hidden">
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h2 class="text-xl font-extrabold text-slate-800"><i class="fa-solid fa-user-gear text-red-600 mr-2"></i> Gestión de Atención</h2>
-                    <button onclick="limpiarRegistros()" class="px-4 py-2 bg-red-50 text-red-700 rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can"></i> Limpiar</button>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-pen-to-square text-red-600 mr-2"></i> Registrar Atención</h2>
+                    <button onclick="limpiarRegistros()" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash-can"></i> Limpiar Todo</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                    <div><label class="block text-sm font-bold mb-2">Analista Soporte</label><select id="op-nombre" onchange="limpiarFormularioTicket()" class="w-full bg-slate-50 border rounded-2xl px-4 py-3"></select></div>
-                    <div><label class="block text-sm font-bold mb-2">Estado</label><select id="op-estado" class="w-full bg-slate-50 border rounded-2xl px-4 py-3" onchange="verificarEstadoLibre()"><option value="libre">🟢 Libre</option><option value="ocupado">🔴 Ocupado</option></select></div>
-                    <div><label class="block text-sm font-bold mb-2">Código iTop</label><input type="text" id="op-ticket" placeholder="R-006781" class="w-full bg-slate-50 border rounded-2xl px-4 py-3 uppercase font-mono font-bold"></div>
-                    <div><label class="block text-sm font-bold mb-2">Foto / Ctrl+V</label><input type="file" id="op-foto-file" accept="image/*" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-red-50 file:text-red-700"><input type="hidden" id="op-foto-base64"></div>
-                    <div class="md:col-span-4 mt-2"><button onclick="guardarAtencion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl"><i class="fa-solid fa-floppy-disk mr-2"></i> Registrar Estado</button></div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Analista Soporte</label>
+                        <select id="op-nombre" onchange="limpiarFormularioTicket()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm"></select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Estado</label>
+                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm" onchange="verificarEstadoLibre()"><option value="libre">🟢 Libre</option><option value="ocupado">🔴 Ocupado</option></select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Ticket iTop</label>
+                        <input type="text" id="op-ticket" placeholder="R-006781" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm uppercase font-mono">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Evidencia (Ctrl+V)</label>
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-1 bg-slate-50 text-center cursor-pointer hover:bg-slate-100 relative" onclick="document.getElementById('op-foto-file').click()">
+                            <span class="text-xs text-slate-500"><i class="fa-solid fa-camera"></i> Adjuntar o Pegar</span>
+                            <input type="file" id="op-foto-file" accept="image/*" class="hidden">
+                            <img id="foto-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-lg opacity-80">
+                        </div>
+                        <input type="hidden" id="op-foto-base64">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button onclick="guardarAtencion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-sm transition"><i class="fa-solid fa-save mr-1"></i> Guardar</button>
+                    </div>
+                    <div class="md:col-span-12" id="comentario-container" style="display:none;">
+                        <input type="text" id="op-comentario" placeholder="Comentario breve sobre la foto (opcional)..." class="w-full bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                    </div>
                 </div>
             </div>
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <h2 class="text-xl font-extrabold text-red-600 mb-6 uppercase"><i class="fa-solid fa-list-check mr-2"></i> Estado General</h2>
-                <div class="table-responsive border rounded-xl">
-                    <table><thead><tr><th>ANALISTA</th><th>ESTADO</th><th>TICKET</th><th>PROGRESO</th><th>TIEMPO</th></tr></thead>
-                    <tbody id="tabla-analistas-general"></tbody></table>
-                </div>
+
+            <!-- Tabla Operador (Igual a Imagen 1) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ANALISTA SOPORTE</th>
+                            <th>ESTADO</th>
+                            <th>TICKET EN ATENCIÓN</th>
+                            <th>EVIDENCIA FOTO</th>
+                            <th>PROGRESO TOTAL DE ATENCIONES</th>
+                            <th>TIEMPO TRANSCURRIDO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-analistas-general"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- MÓDULOS Y RANKING -->
-        <div id="view-ranking" class="space-y-8 w-full hidden">
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <div class="flex justify-between items-center mb-8 pb-4 border-b">
-                    <h2 class="text-xl font-extrabold"><i class="fa-solid fa-display text-emerald-600 mr-2"></i> MÓDULOS Y ESTADO</h2>
-                    <div id="live-clock-card" class="bg-slate-900 text-emerald-400 px-6 py-3 rounded-2xl font-mono font-black"></div>
+        <!-- VIEW: RANKING Y MODULOS -->
+        <div id="view-ranking" class="space-y-6 w-full hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-extrabold"><i class="fa-solid fa-display text-emerald-600 mr-2"></i> MÓDULOS Y RANKING</h2>
+                <div class="bg-slate-900 text-emerald-400 px-4 py-2 rounded-xl font-mono font-bold text-sm" id="live-clock">--:--:--</div>
+            </div>
+            
+            <!-- Tarjetas (Igual a Imagen 2) -->
+            <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+            <!-- Ranking (Igual a Imagen 3) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-slate-800"><i class="fa-solid fa-ranking-star text-red-600 mr-2"></i> RANKING DE ATENCIONES</h3>
+                    <span class="text-xs font-bold text-slate-500 bg-white border px-3 py-1 rounded-full">Estadísticas en Vivo</span>
                 </div>
-                <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="chart-card"><h3 class="font-bold mb-4">CARGA POR ANALISTA</h3><div class="chart-canvas-wrap"><canvas id="chart-carga"></canvas></div></div>
-                <div class="chart-card"><h3 class="font-bold mb-4">DISTRIBUCIÓN R vs I</h3><div class="chart-canvas-wrap"><canvas id="chart-distribucion"></canvas></div></div>
-            </div>
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <h2 class="text-xl font-extrabold mb-6 uppercase"><i class="fa-solid fa-ranking-star text-red-600 mr-2"></i> Ranking</h2>
-                <div class="table-responsive border rounded-xl"><table><thead><tr><th>#</th><th>ANALISTA</th><th>REQ (R)</th><th>INC (I)</th><th>PROGRESO</th></tr></thead><tbody id="tabla-ranking"></tbody></table></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 80px; text-align: center;"># RANKING</th>
+                            <th>ANALISTA SOPORTE</th>
+                            <th style="text-align: center; width: 150px;">REQUERIMIENTOS (R)</th>
+                            <th style="text-align: center; width: 150px;">INCIDENTES (I)</th>
+                            <th style="width: 40%;">PROGRESO TOTAL DE ATENCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ranking"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- HISTORIAL -->
+        <!-- VIEW: HISTORIAL -->
         <div id="view-historial" class="space-y-6 w-full hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-red-600"></i> Historial General de Atenciones</h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="hist-search" placeholder="Buscar por ticket o nombre..." class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm w-64">
+                        <select id="hist-sort" class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm font-semibold">
+                            <option value="desc">Ordenar por Fecha (Más reciente)</option>
+                            <option value="asc">Ordenar por Fecha (Más antiguo)</option>
+                        </select>
+                        <button onclick="exportarHistorialCSV()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900"><i class="fa-solid fa-file-csv"></i></button>
+                    </div>
+                </div>
+                <div class="overflow-hidden rounded-xl border border-slate-200">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>FECHA Y HORA</th>
+                                <th>ANALISTA SOPORTE</th>
+                                <th>REQUERIMIENTO / INCIDENTE</th>
+                                <th style="text-align: center;">EVIDENCIA FOTOGRÁFICA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: USUARIOS -->
+        <div id="view-usuarios" class="space-y-6 w-full hidden">
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h2 class="text-xl font-extrabold"><i class="fa-solid fa-clock-rotate-left text-red-600 mr-2"></i> Historial</h2>
-                    <button onclick="exportarHistorialCSV()" class="px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                    <h2 class="text-xl font-extrabold text-slate-800"><i class="fa-solid fa-users-gear text-amber-600 mr-2"></i> Gestión de Usuarios</h2>
                 </div>
-                <div id="resumenes-diarios" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
-                <div class="table-responsive border rounded-xl"><table><thead><tr><th>Hora</th><th>Analista</th><th>Ticket</th><th>Evento</th></tr></thead><tbody id="tabla-historial"></tbody></table></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Usuario</label><input type="text" id="new-user-name" placeholder="juan.perez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Nombre Real</label><input type="text" id="new-user-realname" placeholder="Juan Pérez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Rol</label><select id="new-user-role" class="w-full border rounded-xl px-3 py-2 text-sm"><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+                    <div class="flex items-end"><button onclick="crearUsuario()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Crear</button></div>
+                </div>
+                <div class="table-responsive border rounded-xl">
+                    <table><thead><tr><th>USUARIO</th><th>NOMBRE REAL</th><th>ROL</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody id="tabla-usuarios"></tbody></table>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- CHAT FLOTANTE -->
-    <button id="chat-fab" class="hidden" onclick="toggleChatPanel()"><i class="fa-solid fa-comments"></i><span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span></button>
+    <!-- CHAT FLOTANTE MULTIUSUARIO -->
+    <button id="chat-fab" class="hidden" onclick="toggleChatPanel()">
+        <i class="fa-solid fa-comments"></i>
+        <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">0</span>
+    </button>
+    
     <div id="chat-panel">
         <div class="chat-header">
             <div><div class="font-extrabold">Chat del Equipo</div><div class="text-xs opacity-90"><span class="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> En línea</div></div>
-            <button onclick="toggleChatPanel()" class="text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <button onclick="toggleChatPanel()" class="text-white hover:bg-white/20 p-2 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
         <div class="chat-body" id="chat-body"></div>
         <div class="chat-footer">
-            <textarea id="chat-input" class="chat-input" rows="1" placeholder="Escribe un mensaje..."></textarea>
-            <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane"></i></button>
+            <img id="chat-photo-preview" class="hidden max-h-16 rounded-lg mb-2 border-2 border-red-600">
+            <div class="chat-input-wrap">
+                <div id="mention-menu"></div>
+                <button onclick="document.getElementById('chat-file').click()" class="text-slate-400 hover:text-red-600 px-2 pb-2 transition"><i class="fa-solid fa-camera text-xl"></i></button>
+                <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="procesarFotoChat(event)">
+                <textarea id="chat-input" class="chat-input" rows="1" placeholder="Mensaje... usa @ para etiquetar"></textarea>
+                <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
 
@@ -259,46 +367,73 @@
         let analistasData = [];
         let historialData = [];
         let chatMensajes = [];
+        let usuariosData = {}; 
         let sesionActual = null;
         let firebaseListo = false;
         let chatAbierto = false;
         let mensajesNoLeidos = 0;
-        let ultimoMensajeVisto = 0;
-        let chartCarga = null, chartDist = null;
+        let tempFotoChat = null;
+        let usuarioCambiandoPass = null;
+        let timerInterval = null;
 
-        const USUARIOS = {
-            admin:  { pass: 'admin123',  nombre: 'Operador Mesa de Ayuda', rol: 'admin',  rolLabel: 'Operador' },
-            viewer: { pass: 'viewer123', nombre: 'Analista Observador',    rol: 'viewer', rolLabel: 'Solo lectura' }
-        };
-
-        /* ============================================
-           UTILIDADES
-           ============================================ */
+        const AVATAR_COLORS = ['#C5221F','#059669','#2563eb','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
+        function colorAvatar(nombre) { let h = 0; for (let i = 0; i < nombre.length; i++) h = nombre.charCodeAt(i) + ((h << 5) - h); return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]; }
         function escapeHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-        function formatFechaPe(iso) { return new Date(iso).toLocaleString('es-PE', { timeZone: 'America/Lima' }); }
         
-        // Esperar a que Firebase esté listo
         window.addEventListener('firebaseReady', () => {
             firebaseListo = true;
             iniciarEscuchasFirebase();
         });
 
+        function mostrarToast(msg, tipo = 'success') {
+            const colors = { success: 'bg-emerald-600', error: 'bg-rose-600', info: 'bg-slate-800' };
+            const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
+            const toast = document.createElement('div');
+            toast.className = `${colors[tipo]} text-white px-4 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3`;
+            toast.innerHTML = `<i class="fa-solid ${icons[tipo]} text-lg"></i> ${escapeHtml(msg)}`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        function abrirModalFoto(src, titulo = '') {
+            if (!src) return;
+            document.getElementById('modal-img-element').src = src;
+            const t = document.getElementById('modal-foto-title');
+            if (titulo) { t.textContent = titulo; t.classList.remove('hidden'); } else { t.classList.add('hidden'); }
+            document.getElementById('photo-modal').classList.remove('hidden');
+        }
+        function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
+
         /* ============================================
-           SINCRONIZACIÓN FIREBASE (TIEMPO REAL)
+           FIREBASE (SINCRONIZACIÓN TOTAL)
            ============================================ */
         function iniciarEscuchasFirebase() {
-            // 1. Escuchar Analistas
+            // 1. Usuarios
+            const usersRef = window.firebaseRef(window.firebaseDB, 'usuarios');
+            window.firebaseOnValue(usersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    window.firebaseSet(usersRef, { admin: { user: 'admin', nombre: 'Administrador', rol: 'admin', pass: 'admin123', debeCambiar: false } });
+                } else { usuariosData = data; renderTablaUsuarios(); }
+            });
+
+            // 2. Analistas
             const analistasRef = window.firebaseRef(window.firebaseDB, 'analistas');
             window.firebaseOnValue(analistasRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    analistasData = Object.values(data);
-                    renderTablaAnalistasGeneral();
-                    renderRankingYModulos();
+                    analistasData = Object.values(data).sort((a, b) => a.nombre.localeCompare(b.nombre));
+                } else {
+                    const LISTA = ["Mijael Rivera", "Manuel Rivera", "Carlos Farro", "Rocky Antizana", "Alonso Venegas", "Hernand de la Cruz", "Carlitos Hidalgo"];
+                    analistasData = LISTA.map((n, i) => ({ id: i+1, nombre: n, estado: 'libre', ticket: '-', foto: null, comentario: '', startTime: null, totalR: 0, totalI: 0 }));
+                    window.firebaseSet(analistasRef, analistasData);
                 }
+                poblarSelectAnalistas();
+                renderTablaAnalistasGeneral();
+                renderRankingYModulos();
             });
 
-            // 2. Escuchar Historial
+            // 3. Historial
             const historialRef = window.firebaseRef(window.firebaseDB, 'historial');
             window.firebaseOnValue(historialRef, (snapshot) => {
                 const data = snapshot.val();
@@ -308,13 +443,12 @@
                 }
             });
 
-            // 3. Escuchar Chat
-            const chatRef = window.firebaseQuery(window.firebaseRef(window.firebaseDB, 'chat'), window.firebaseLimitToLast(50));
+            // 4. Chat (Sincronización en tiempo real)
+            const chatRef = window.firebaseQuery(window.firebaseRef(window.firebaseDB, 'chat'), window.firebaseLimitToLast(100));
             window.firebaseOnValue(chatRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const nuevos = Object.values(data);
-                    // Detectar si hay mensajes nuevos para notificar
                     if (chatMensajes.length > 0 && nuevos.length > chatMensajes.length) {
                         const ultimo = nuevos[nuevos.length - 1];
                         if (ultimo.user !== sesionActual?.user) {
@@ -336,24 +470,40 @@
             const pass = document.getElementById('login-pass').value;
             const err = document.getElementById('login-error');
             
-            if (!USUARIOS[user]) { err.textContent = '❌ Usuario no encontrado.'; err.classList.remove('hidden'); return; }
-            if (USUARIOS[user].pass !== pass) { err.textContent = '❌ Contraseña incorrecta.'; err.classList.remove('hidden'); return; }
+            if (!usuariosData[user]) { err.textContent = '❌ Usuario no encontrado.'; err.classList.remove('hidden'); return; }
+            if (usuariosData[user].pass !== pass) { err.textContent = '❌ Contraseña incorrecta.'; err.classList.remove('hidden'); return; }
             
             err.classList.add('hidden');
-            sesionActual = { user, ...USUARIOS[user] };
-            sessionStorage.setItem('ogti_session', JSON.stringify(sesionActual));
+            if (usuariosData[user].debeCambiar) {
+                usuarioCambiandoPass = user;
+                document.getElementById('login-form-area').classList.add('hidden');
+                document.getElementById('change-pass-area').classList.remove('hidden');
+                return;
+            }
+            sesionActual = { user, ...usuariosData[user] };
+            sessionStorage.setItem('ogti_session_v11', JSON.stringify(sesionActual));
             iniciarSesionUI();
         }
 
-        function cerrarSesion() {
-            sessionStorage.removeItem('ogti_session');
-            location.reload(); // Recargar para limpiar todo
+        function guardarNuevaPassword() {
+            const p1 = document.getElementById('new-pass').value;
+            const p2 = document.getElementById('confirm-pass').value;
+            const err = document.getElementById('change-pass-error');
+            if (p1.length < 6) { err.textContent = '⚠️ Mínimo 6 caracteres.'; err.classList.remove('hidden'); return; }
+            if (p1 !== p2) { err.textContent = '⚠️ No coinciden.'; err.classList.remove('hidden'); return; }
+            err.classList.add('hidden');
+            const user = usuarioCambiandoPass;
+            
+            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
+                usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
+                sesionActual = { user, ...usuariosData[user] };
+                sessionStorage.setItem('ogti_session_v11', JSON.stringify(sesionActual));
+                iniciarSesionUI();
+            });
         }
 
-        function verificarSesionAlCargar() {
-            const s = sessionStorage.getItem('ogti_session');
-            if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); }
-        }
+        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v11'); location.reload(); }
+        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v11'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
 
         function iniciarSesionUI() {
             if (!sesionActual) return;
@@ -364,105 +514,45 @@
             document.getElementById('btn-logout').classList.remove('hidden');
             document.getElementById('chat-fab').classList.remove('hidden');
             document.getElementById('user-name-display').textContent = sesionActual.nombre;
-            document.getElementById('user-role-display').textContent = sesionActual.rolLabel;
+            document.getElementById('user-role-display').textContent = sesionActual.rol;
             
             document.getElementById('btn-rank').classList.remove('hidden');
             if (sesionActual.rol === 'admin') {
                 document.getElementById('btn-op').classList.remove('hidden');
                 document.getElementById('btn-hist').classList.remove('hidden');
+                document.getElementById('btn-users').classList.remove('hidden');
             }
             switchView('ranking');
+            iniciarReloj();
         }
 
-        /* ============================================
-           NAVEGACIÓN
-           ============================================ */
+        function iniciarReloj() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const el = document.getElementById('live-clock');
+                if (el) el.textContent = new Date().toLocaleTimeString('es-PE');
+                actualizarTiemposVista();
+            }, 1000);
+        }
+
         function switchView(v) {
             if (!sesionActual) return;
-            if (sesionActual.rol === 'viewer' && v !== 'ranking') { mostrarToast('⛔ Sin acceso.', 'error'); v = 'ranking'; }
-            
-            ['operador','ranking','historial'].forEach(x => document.getElementById(`view-${x}`).classList.add('hidden'));
+            if (sesionActual.rol === 'viewer' && v !== 'ranking') { v = 'ranking'; }
+            ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
             document.getElementById(`view-${v}`).classList.remove('hidden');
             
             if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
             else if (v === 'ranking') renderRankingYModulos();
             else if (v === 'historial') renderHistorial();
+            else if (v === 'usuarios') renderTablaUsuarios();
         }
 
         /* ============================================
-           GUARDAR ATENCIÓN (ESCRIBIR EN FIREBASE)
-           ============================================ */
-        async function guardarAtencion() {
-            if (!sesionActual || sesionActual.rol !== 'admin') return;
-            if (!firebaseListo) { mostrarToast('Conectando al servidor...', 'info'); return; }
-
-            const nombreSel = document.getElementById('op-nombre').value;
-            const estadoSel = document.getElementById('op-estado').value;
-            let ticketSel = document.getElementById('op-ticket').value.trim().toUpperCase() || '-';
-            let fotoSel = document.getElementById('op-foto-base64').value || null;
-
-            if (estadoSel === 'ocupado' && ticketSel === '-') { mostrarToast('⚠️ Ingrese ticket.', 'error'); return; }
-
-            const a = analistasData.find(x => x.nombre === nombreSel);
-            if (!a) return;
-
-            // Actualizar estado en el objeto local
-            a.estado = estadoSel;
-            a.ticket = ticketSel;
-            a.foto = fotoSel;
-            a.startTime = estadoSel === 'ocupado' ? (a.startTime || Date.now()) : null;
-            
-            if (estadoSel === 'ocupado' && ticketSel.startsWith('I-')) a.totalI = (a.totalI||0) + 1;
-            if (estadoSel === 'ocupado' && ticketSel.startsWith('R-')) a.totalR = (a.totalR||0) + 1;
-
-            // Sobrescribir en Firebase (sincroniza a todos)
-            const updates = {};
-            updates['analistas'] = analistasData;
-            await window.firebaseSet(window.firebaseRef(window.firebaseDB), updates);
-
-            // Guardar en historial
-            const nuevoHistorial = {
-                fecha: new Date().toISOString(),
-                nombre: nombreSel,
-                ticket: ticketSel,
-                evento: estadoSel === 'ocupado' ? 'apertura' : 'cierre'
-            };
-            historialData.unshift(nuevoHistorial);
-            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
-
-            mostrarToast('✅ Guardado y sincronizado.');
-            document.getElementById('op-foto-base64').value = '';
-            document.getElementById('op-foto-file').value = '';
-        }
-
-        /* ============================================
-           CHAT (ESCRIBIR EN FIREBASE)
-           ============================================ */
-        function enviarMensajeChat() {
-            if (!sesionActual || !firebaseListo) return;
-            const input = document.getElementById('chat-input');
-            const texto = input.value.trim();
-            if (!texto) return;
-
-            const msg = {
-                user: sesionActual.user,
-                nombre: sesionActual.nombre,
-                mensaje: texto,
-                timestamp: Date.now()
-            };
-
-            // Push agrega un nuevo hijo sin sobrescribir los anteriores
-            window.firebasePush(window.firebaseRef(window.firebaseDB, 'chat'), msg);
-            
-            input.value = '';
-            input.style.height = 'auto';
-        }
-
-        /* ============================================
-           RENDERS (MISMOS DE V6.0)
+           OPERADOR
            ============================================ */
         function poblarSelectAnalistas() {
             const s = document.getElementById('op-nombre');
+            if (!s) return;
             s.innerHTML = analistasData.map(a => `<option value="${escapeHtml(a.nombre)}">${escapeHtml(a.nombre)}</option>`).join('');
         }
 
@@ -472,6 +562,13 @@
             if (a) {
                 document.getElementById('op-estado').value = a.estado;
                 document.getElementById('op-ticket').value = a.ticket !== '-' ? a.ticket : '';
+                document.getElementById('op-comentario').value = a.comentario || '';
+                
+                const prev = document.getElementById('foto-preview');
+                const cont = document.getElementById('comentario-container');
+                const b64 = document.getElementById('op-foto-base64');
+                if (a.foto) { prev.src = a.foto; prev.classList.remove('hidden'); cont.style.display = 'block'; b64.value = a.foto; }
+                else { prev.classList.add('hidden'); cont.style.display = 'none'; b64.value = ''; }
             }
             verificarEstadoLibre();
         }
@@ -482,64 +579,241 @@
             if (e === 'libre') document.getElementById('op-ticket').value = '-';
         }
 
+        function mostrarComentarioFoto(b64) {
+            document.getElementById('op-foto-base64').value = b64;
+            const prev = document.getElementById('foto-preview');
+            prev.src = b64; prev.classList.remove('hidden');
+            document.getElementById('comentario-container').style.display = 'block';
+        }
+
+        document.addEventListener('paste', function(e) {
+            if (document.getElementById('view-operador').classList.contains('hidden')) return;
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let w = img.width, h = img.height;
+                            if (w > 800 || h > 800) { const r = Math.min(800/w, 800/h); w = w*r; h = h*r; }
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                            mostrarComentarioFoto(canvas.toDataURL('image/jpeg', 0.7));
+                            mostrarToast('📋 Foto pegada.', 'info');
+                        };
+                        img.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+        });
+
+        document.getElementById('op-foto-file').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > 800 || h > 800) { const r = Math.min(800/w, 800/h); w = w*r; h = h*r; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    mostrarComentarioFoto(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function guardarAtencion() {
+            if (sesionActual.rol !== 'admin') return;
+            const nombreSel = document.getElementById('op-nombre').value;
+            const estadoSel = document.getElementById('op-estado').value;
+            let ticketSel = document.getElementById('op-ticket').value.trim().toUpperCase() || '-';
+            const fotoSel = document.getElementById('op-foto-base64').value || null;
+            const comentarioSel = document.getElementById('op-comentario').value.trim() || null;
+            
+            if (estadoSel === 'ocupado' && ticketSel === '-') { mostrarToast('Ingrese ticket.', 'error'); return; }
+
+            const a = analistasData.find(x => x.nombre === nombreSel);
+            if (!a) return;
+
+            a.estado = estadoSel;
+            a.ticket = ticketSel;
+            a.foto = estadoSel === 'ocupado' ? fotoSel : null;
+            a.comentario = estadoSel === 'ocupado' ? comentarioSel : null;
+            a.startTime = estadoSel === 'ocupado' ? (a.startTime || Date.now()) : null;
+            
+            if (estadoSel === 'ocupado' && ticketSel.startsWith('I-')) a.totalI = (a.totalI||0) + 1;
+            if (estadoSel === 'ocupado' && ticketSel.startsWith('R-')) a.totalR = (a.totalR||0) + 1;
+
+            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
+
+            const nuevoHistorial = {
+                fecha: new Date().toISOString(),
+                nombre: nombreSel,
+                ticket: ticketSel,
+                evento: estadoSel === 'ocupado' ? 'apertura' : 'cierre',
+                comentario: comentarioSel,
+                foto: a.foto
+            };
+            historialData.unshift(nuevoHistorial);
+            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
+            
+            mostrarToast(`Atención asignada a ${nombreSel} (${ticketSel})`, 'success');
+            reproducirAlertaTicket(`${ticketSel} para ${nombreSel}`);
+            
+            limpiarFormularioTicket();
+        }
+
+        function reproducirAlertaTicket(detalle) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
+                m.lang='es-PE'; m.rate=1.05;
+                setTimeout(() => window.speechSynthesis.speak(m), 300);
+            }
+        }
+
+        /* ============================================
+           RENDERS
+           ============================================ */
+        function calcularTiempo(startTime) {
+            if (!startTime) return { text: '-', critical: false };
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            const s = diff % 60;
+            const text = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+            return { text, critical: h >= 1 };
+        }
+
+        function actualizarTiemposVista() {
+            if (!document.getElementById('view-ranking').classList.contains('hidden')) {
+                document.querySelectorAll('.time-live').forEach(el => {
+                    const start = parseInt(el.getAttribute('data-start'));
+                    const { text, critical } = calcularTiempo(start);
+                    el.innerHTML = critical 
+                        ? `<span class="time-badge time-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${text} (> 1h)</span>`
+                        : `<span class="time-badge time-normal"><i class="fa-regular fa-clock"></i> ${text}</span>`;
+                });
+            }
+            if (!document.getElementById('view-operador').classList.contains('hidden')) {
+                document.querySelectorAll('.time-live-table').forEach(el => {
+                    const start = parseInt(el.getAttribute('data-start'));
+                    const { text, critical } = calcularTiempo(start);
+                    el.innerHTML = critical 
+                        ? `<span class="time-badge time-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${text}</span>`
+                        : `<span class="time-badge time-normal"><i class="fa-regular fa-clock"></i> ${text}</span>`;
+                });
+            }
+        }
+
         function renderTablaAnalistasGeneral() {
             const tb = document.getElementById('tabla-analistas-general');
             if (!tb) return;
+            const maxTotal = Math.max(...analistasData.map(a => (a.totalR||0) + (a.totalI||0)), 1);
             let html = '';
+            
             analistasData.forEach(a => {
+                const total = (a.totalR||0) + (a.totalI||0);
+                const pct = Math.round((total / maxTotal) * 100);
+                let fotoHtml = '<span class="text-slate-400">-</span>';
+                if (a.foto) {
+                    fotoHtml = `<button onclick="abrirModalFoto('${a.foto}', 'Comentario: ${escapeHtml(a.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700 text-lg"><i class="fa-solid fa-image"></i></button>`;
+                }
+                let timeHtml = '<span class="text-slate-400">-</span>';
+                if (a.estado === 'ocupado' && a.startTime) {
+                    timeHtml = `<span class="time-live-table" data-start="${a.startTime}">...</span>`;
+                }
+
                 html += `<tr>
-                    <td class="font-bold">${escapeHtml(a.nombre)}</td>
-                    <td><span class="status-pill ${a.estado === 'ocupado' ? 'status-busy' : 'status-free'}">${a.estado.toUpperCase()}</span></td>
-                    <td class="font-mono">${escapeHtml(a.ticket)}</td>
-                    <td>${a.totalR} R / ${a.totalI} I</td>
-                    <td>${a.startTime ? 'Activo' : '-'}</td>
+                    <td class="font-bold text-slate-800">${escapeHtml(a.nombre)}</td>
+                    <td>
+                        <span class="status-pill ${a.estado === 'ocupado' ? 'status-busy' : 'status-free'}">
+                            <span class="${a.estado === 'ocupado' ? 'dot-red' : 'dot-green'}"></span>
+                            ${a.estado === 'ocupado' ? 'OCUPADO (Atendiendo)' : 'LIBRE (Disponible)'}
+                        </span>
+                    </td>
+                    <td class="font-mono text-slate-700">${escapeHtml(a.ticket)}</td>
+                    <td>${fotoHtml}</td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-text">${total}<br><span class="progress-pct">(${pct}%)</span></div>
+                            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        </div>
+                    </td>
+                    <td>${timeHtml}</td>
                 </tr>`;
             });
             tb.innerHTML = html;
+            actualizarTiemposVista();
         }
 
         function renderRankingYModulos() {
             const g = document.getElementById('grid-analistas-modulos');
             if (!g) return;
             let html = '';
+            
             analistasData.forEach(a => {
                 const busy = a.estado === 'ocupado';
-                html += `<div class="card-analyst ${busy ? 'busy' : 'available'}">
-                    <div class="status-badge">${busy ? 'ATENDIENDO' : 'LIBRE'}</div>
-                    <h3 class="text-xl font-extrabold my-4">${escapeHtml(a.nombre)}</h3>
+                let tooltip = '';
+                if (busy && a.foto) {
+                    tooltip = `<div class="tooltip-content"><img src="${a.foto}"><div class="text-xs text-center mt-1 font-bold text-slate-700">${escapeHtml(a.comentario || 'Ver foto')}</div></div>`;
+                }
+                const clickAttr = (busy && a.foto) ? `onclick="abrirModalFoto('${a.foto}', 'Comentario: ${escapeHtml(a.comentario || 'Sin comentario')}')"` : '';
+                
+                let timeHtml = '<span class="text-sm font-semibold text-slate-500">-</span>';
+                if (busy && a.startTime) {
+                    timeHtml = `<span class="time-live" data-start="${a.startTime}">...</span>`;
+                }
+
+                html += `<div class="card-analyst ${busy ? 'busy' : 'available'} ${busy && a.foto ? 'tooltip-img' : ''}" ${clickAttr}>
+                    ${tooltip}
+                    <div class="text-xs font-extrabold uppercase tracking-wider mb-2 ${busy ? 'text-red-600' : 'text-emerald-600'}">
+                        ${busy ? '<span class="dot-red mr-1"></span> ATENDIENDO' : '<span class="dot-green mr-1"></span> LIBRE'}
+                    </div>
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-3">${escapeHtml(a.nombre)}</h3>
                     <div class="main-action font-mono">${busy ? escapeHtml(a.ticket) : 'DISPONIBLE'}</div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-200/50">
+                        <span class="text-xs font-bold text-slate-500">Tiempo de atención:</span>
+                        ${timeHtml}
+                    </div>
                 </div>`;
             });
             g.innerHTML = html;
 
             const tb = document.getElementById('tabla-ranking');
             const ord = [...analistasData].sort((a,b) => (b.totalR+b.totalI)-(a.totalR+a.totalI));
+            const maxT = Math.max(...ord.map(a => (a.totalR||0)+(a.totalI||0)), 1);
             let rows = '';
             ord.forEach((a,i) => {
-                rows += `<tr><td>${i+1}</td><td>${a.nombre}</td><td>${a.totalR}</td><td>${a.totalI}</td><td>${a.totalR+a.totalI}</td></tr>`;
+                const total = (a.totalR||0)+(a.totalI||0);
+                const pct = Math.round((total/maxT)*100);
+                let medal = `<span class="text-slate-500 font-bold">#${i+1}</span>`;
+                if (i===0) medal = '<span class="text-2xl">🥇</span>';
+                if (i===1) medal = '<span class="text-2xl">🥈</span>';
+                if (i===2) medal = '<span class="text-2xl">🥉</span>';
+
+                rows += `<tr>
+                    <td style="text-align:center;">${medal}</td>
+                    <td class="font-bold text-slate-800">${escapeHtml(a.nombre)}</td>
+                    <td style="text-align:center;" class="text-emerald-600 font-extrabold text-lg">${a.totalR||0}</td>
+                    <td style="text-align:center;" class="text-red-600 font-extrabold text-lg">${a.totalI||0}</td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-text">${total}<br><span class="progress-pct">(${pct}%)</span></div>
+                            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        </div>
+                    </td>
+                </tr>`;
             });
             if (tb) tb.innerHTML = rows;
-
-            // Gráficas
-            const cC = document.getElementById('chart-carga');
-            if (cC) {
-                if (chartCarga) chartCarga.destroy();
-                chartCarga = new Chart(cC, {
-                    type: 'bar',
-                    data: { labels: analistasData.map(a=>a.nombre), datasets: [
-                        { label: 'Requerimientos', data: analistasData.map(a=>a.totalR), backgroundColor: '#059669' },
-                        { label: 'Incidentes', data: analistasData.map(a=>a.totalI), backgroundColor: '#C5221F' }
-                    ]}
-                });
-            }
-            const cD = document.getElementById('chart-distribucion');
-            if (cD) {
-                if (chartDist) chartDist.destroy();
-                chartDist = new Chart(cD, {
-                    type: 'doughnut',
-                    data: { labels: ['Req', 'Inc'], datasets: [{ data: [analistasData.reduce((s,a)=>s+a.totalR,0), analistasData.reduce((s,a)=>s+a.totalI,0)], backgroundColor: ['#059669', '#C5221F'] }] }
-                });
-            }
+            actualizarTiemposVista();
         }
 
         function renderHistorial() {
@@ -547,9 +821,83 @@
             if (!tb) return;
             let html = '';
             historialData.slice(0, 50).forEach(h => {
-                html += `<tr><td>${new Date(h.fecha).toLocaleTimeString('es-PE')}</td><td>${h.nombre}</td><td>${h.ticket}</td><td>${h.evento}</td></tr>`;
+                let adjunto = '<span class="text-slate-400 font-semibold">Sin foto</span>';
+                if (h.foto) {
+                    adjunto = `<div class="flex flex-col items-center gap-1">
+                        <button onclick="abrirModalFoto('${h.foto}', 'Comentario: ${escapeHtml(h.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-image text-xl"></i></button>
+                        <span class="text-xs text-slate-500 truncate max-w-[150px]">${escapeHtml(h.comentario || '')}</span>
+                    </div>`;
+                }
+                html += `<tr>
+                    <td class="text-sm text-slate-600">${new Date(h.fecha).toLocaleString('es-PE')}</td>
+                    <td class="font-bold text-slate-800">${escapeHtml(h.nombre)}</td>
+                    <td class="font-mono font-bold text-red-600">${escapeHtml(h.ticket)}</td>
+                    <td style="text-align:center;">${adjunto}</td>
+                </tr>`;
             });
             tb.innerHTML = html;
+        }
+        
+        function limpiarRegistros() {
+            if (!confirm("¿Reiniciar TODOS los tickets e historial?")) return;
+            analistasData.forEach(a => { a.estado='libre'; a.ticket='-'; a.foto=null; a.comentario=null; a.startTime=null; a.totalR=0; a.totalI=0; });
+            window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
+            window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), []);
+            mostrarToast('Sistema reiniciado.', 'info');
+        }
+
+        /* ============================================
+           USUARIOS
+           ============================================ */
+        function crearUsuario() {
+            const user = document.getElementById('new-user-name').value.trim().toLowerCase();
+            const nombre = document.getElementById('new-user-realname').value.trim();
+            const rol = document.getElementById('new-user-role').value;
+            if (!user || !nombre) { alert('Complete todos los campos.'); return; }
+            if (usuariosData[user]) { alert('El usuario ya existe.'); return; }
+
+            window.firebaseSet(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { user, nombre, rol, pass: '123456', debeCambiar: true }).then(() => {
+                mostrarToast(`Usuario ${user} creado. Pass temporal: 123456`, 'success');
+                document.getElementById('new-user-name').value = '';
+                document.getElementById('new-user-realname').value = '';
+            });
+        }
+
+        function resetearPassword(user) {
+            if (!confirm(`¿Resetear contraseña de ${user} a "123456"?`)) return;
+            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: '123456', debeCambiar: true }).then(() => mostrarToast('Contraseña reseteada.', 'info'));
+        }
+
+        function renderTablaUsuarios() {
+            const tb = document.getElementById('tabla-usuarios');
+            if (!tb) return;
+            let html = '';
+            Object.values(usuariosData).forEach(u => {
+                html += `<tr>
+                    <td class="font-mono font-bold">${escapeHtml(u.user)}</td>
+                    <td>${escapeHtml(u.nombre)}</td>
+                    <td><span class="px-2 py-1 rounded text-xs font-bold ${u.rol==='admin'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${u.rol.toUpperCase()}</span></td>
+                    <td class="font-mono text-slate-400 text-xs">${u.debeCambiar ? 'Cambio pendiente' : '••••••••'}</td>
+                    <td><button onclick="resetearPassword('${u.user}')" class="text-red-500 hover:text-red-700 text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
+                </tr>`;
+            });
+            tb.innerHTML = html;
+        }
+
+        /* ============================================
+           CHAT MULTIUSUARIO COMPLETO
+           ============================================ */
+        function toggleChatPanel() {
+            chatAbierto = !chatAbierto;
+            document.getElementById('chat-panel').classList.toggle('show', chatAbierto);
+            document.getElementById('chat-fab').classList.toggle('hidden', chatAbierto);
+            if (chatAbierto) { 
+                mensajesNoLeidos = 0; 
+                actualizarBadgeChat(); 
+                renderChatMensajes(); 
+                document.getElementById('chat-input').focus(); 
+                document.getElementById('chat-notification').classList.add('translate-x-[150%]'); 
+            }
         }
 
         function renderChatMensajes() {
@@ -558,11 +906,18 @@
             let html = '';
             chatMensajes.forEach(m => {
                 const isMine = m.user === sesionActual?.user;
+                const color = colorAvatar(m.nombre);
+                let textoHtml = escapeHtml(m.mensaje);
+                if (m.mensaje.includes('@')) textoHtml = textoHtml.replace(/@([A-Za-z0-9\s]+?)(?=\s|$|[.,!?])/g, '<span class="mention">@$1</span>');
+                
+                let imgHtml = m.foto ? `<img src="${m.foto}" class="mt-2 rounded-lg max-h-40 cursor-pointer border border-white/20" onclick="abrirModalFoto('${m.foto}')">` : '';
+
                 html += `<div class="chat-msg ${isMine ? 'mine' : ''}">
-                    <div class="chat-avatar" style="background:#C5221F">${m.nombre.charAt(0)}</div>
+                    <div class="chat-avatar" style="background:${color}">${m.nombre.charAt(0).toUpperCase()}</div>
                     <div>
-                        ${!isMine ? `<div class="text-xs font-bold mb-1">${m.nombre}</div>` : ''}
-                        <div class="chat-bubble">${escapeHtml(m.mensaje)}</div>
+                        ${!isMine ? `<div class="text-xs font-bold mb-1 text-slate-500">${escapeHtml(m.nombre)}</div>` : ''}
+                        <div class="chat-bubble">${textoHtml}${imgHtml}</div>
+                        <span class="chat-time ${isMine ? 'text-right' : ''}">${new Date(m.timestamp).toLocaleTimeString('es-PE')}</span>
                     </div>
                 </div>`;
             });
@@ -570,46 +925,126 @@
             body.scrollTop = body.scrollHeight;
         }
 
-        function toggleChatPanel() {
-            chatAbierto = !chatAbierto;
-            document.getElementById('chat-panel').classList.toggle('show', chatAbierto);
-            document.getElementById('chat-fab').classList.toggle('hidden', chatAbierto);
-            if (chatAbierto) { mensajesNoLeidos = 0; actualizarBadgeChat(); renderChatMensajes(); }
-        }
-
         function actualizarBadgeChat() {
             const b = document.getElementById('chat-badge');
-            if (b) {
-                b.textContent = mensajesNoLeidos;
-                b.classList.toggle('hidden', mensajesNoLeidos === 0);
-            }
+            if (b) { b.textContent = mensajesNoLeidos; b.classList.toggle('hidden', mensajesNoLeidos === 0); }
         }
 
         function mostrarNotificacionChat(msg) {
             const n = document.getElementById('chat-notification');
+            document.getElementById('chat-notif-avatar').textContent = msg.nombre.charAt(0).toUpperCase();
+            document.getElementById('chat-notif-avatar').style.background = colorAvatar(msg.nombre);
             document.getElementById('chat-notif-name').textContent = msg.nombre;
-            document.getElementById('chat-notif-text').textContent = msg.mensaje;
-            n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 4000);
+            document.getElementById('chat-notif-text').textContent = msg.mensaje || '📷 Envió una foto';
+            n.classList.remove('translate-x-[150%]');
+            setTimeout(() => n.classList.add('translate-x-[150%]'), 5000);
         }
 
-        function mostrarToast(msg, tipo = 'success') {
-            const t = document.createElement('div');
-            t.className = `fixed bottom-6 right-6 bg-${tipo==='error'?'red':'emerald'}-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50 font-bold`;
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+        const chatInput = document.getElementById('chat-input');
+        const mentionMenu = document.getElementById('mention-menu');
+        let mentionActive = false;
+
+        chatInput.addEventListener('input', function() {
+            const val = this.value;
+            const cursor = this.selectionStart;
+            const textBefore = val.substring(0, cursor);
+            const lastAt = textBefore.lastIndexOf('@');
+
+            if (lastAt !== -1 && (lastAt === 0 || textBefore[lastAt-1] === ' ')) {
+                const query = textBefore.substring(lastAt + 1).toLowerCase();
+                const results = analistasData.filter(a => a.nombre.toLowerCase().includes(query));
+                if (results.length > 0) {
+                    mentionMenu.innerHTML = results.map(a => `<div class="mention-item" onclick="insertarMencion('${a.nombre}')">${a.nombre}</div>`).join('');
+                    mentionMenu.classList.add('show');
+                    mentionActive = true;
+                    return;
+                }
+            }
+            mentionMenu.classList.remove('show');
+            mentionActive = false;
+        });
+
+        function insertarMencion(nombre) {
+            const val = chatInput.value;
+            const cursor = chatInput.selectionStart;
+            const textBefore = val.substring(0, cursor);
+            const textAfter = val.substring(cursor);
+            const lastAt = textBefore.lastIndexOf('@');
+            chatInput.value = textBefore.substring(0, lastAt) + `@${nombre} ` + textAfter;
+            chatInput.focus();
+            mentionMenu.classList.remove('show');
+            mentionActive = false;
         }
 
-        /* ============================================
-           INICIALIZACIÓN
-           ============================================ */
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!mentionActive) enviarMensajeChat();
+            }
+        });
+
+        function procesarFotoChat(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > 800 || h > 800) { const r = Math.min(800/w, 800/h); w = w*r; h = h*r; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    tempFotoChat = canvas.toDataURL('image/jpeg', 0.7);
+                    const preview = document.getElementById('chat-photo-preview');
+                    preview.src = tempFotoChat;
+                    preview.classList.remove('hidden');
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function enviarMensajeChat() {
+            if (!sesionActual || !firebaseListo) return;
+            const texto = chatInput.value.trim();
+            if (!texto && !tempFotoChat) return;
+
+            const msg = {
+                user: sesionActual.user,
+                nombre: sesionActual.nombre,
+                mensaje: texto,
+                foto: tempFotoChat || null,
+                timestamp: Date.now()
+            };
+
+            window.firebasePush(window.firebaseRef(window.firebaseDB, 'chat'), msg);
+            
+            chatInput.value = '';
+            tempFotoChat = null;
+            document.getElementById('chat-photo-preview').classList.add('hidden');
+            document.getElementById('chat-file').value = '';
+        }
+
+        function exportarHistorialCSV() {
+            const filas = [['Fecha','Analista','Ticket','Evento','Comentario']];
+            historialData.forEach(h => filas.push([new Date(h.fecha).toLocaleString('es-PE'), h.nombre, h.ticket, h.evento, h.comentario || '']));
+            const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `historial_ogti.csv`; a.click();
+        }
+
+        document.getElementById('hist-search')?.addEventListener('input', () => {
+            const term = document.getElementById('hist-search').value.toLowerCase();
+            const tb = document.getElementById('tabla-historial');
+            if (!tb) return;
+            Array.from(tb.querySelectorAll('tr')).forEach(tr => {
+                tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             verificarSesionAlCargar();
-            setInterval(() => {
-                const el = document.getElementById('live-clock-card');
-                if (el) el.textContent = new Date().toLocaleTimeString('es-PE');
-            }, 1000);
         });
     </script>
 </body>
