@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OGTI v15.0 - Control de atenciones (Full Screen)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OGTI v16.0 - Control de atenciones (Móvil y Alertas)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -46,8 +46,9 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
         :root { --bg-body: #f4f7f9; --card-bg: #ffffff; --header-bg: #0f172a; --red-primary: #e11d48; --green-primary: #059669; }
-        body { background-color: var(--bg-body); margin: 0; padding: 0; }
-        .full-screen-wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; padding: 24px; }
+        body { background-color: var(--bg-body); margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        .full-screen-wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; padding: 16px; }
+        @media (min-width: 768px) { .full-screen-wrapper { padding: 24px; } }
         
         /* Animaciones de luces */
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
@@ -57,96 +58,110 @@
 
         /* Tablas Generales */
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background-color: var(--header-bg); color: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 16px 24px; }
-        td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 0.95rem; vertical-align: middle; background: white; }
+        th { background-color: var(--header-bg); color: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 16px; }
+        td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 0.9rem; vertical-align: middle; background: white; }
+        @media (min-width: 768px) { th { padding: 16px 24px; } td { padding: 16px 24px; font-size: 0.95rem; } }
         tr:hover td { background-color: #f8fafc; }
         
         /* Pills de Estado */
-        .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
         .status-free { background-color: #dcfce7; color: #166534; }
         .status-busy { background-color: #fee2e2; color: #991b1b; }
         .status-vacaciones { background-color: #fef08a; color: #854d0e; }
 
         /* Barras de progreso */
-        .progress-wrapper { display: flex; align-items: center; gap: 12px; }
-        .progress-text { font-weight: 800; font-size: 0.9rem; color: #0f172a; line-height: 1.1; }
-        .progress-pct { font-size: 0.7rem; color: #64748b; font-weight: 600; }
-        .bar-bg { flex-grow: 1; background-color: #f1f5f9; height: 12px; border-radius: 10px; overflow: hidden; }
+        .progress-wrapper { display: flex; align-items: center; gap: 8px; }
+        .progress-text { font-weight: 800; font-size: 0.85rem; color: #0f172a; line-height: 1.1; }
+        .progress-pct { font-size: 0.65rem; color: #64748b; font-weight: 600; }
+        .bar-bg { flex-grow: 1; background-color: #f1f5f9; height: 10px; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); border-radius: 10px; }
 
         /* Badges de tiempo */
-        .time-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
+        .time-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
         .time-warning { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
         .time-normal { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
         /* Tarjetas Módulos */
-        .card-analyst { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; }
+        .card-analyst { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; }
+        @media (min-width: 768px) { .card-analyst { padding: 24px; } }
         .card-analyst.available { border-color: #bbf7d0; background: linear-gradient(to bottom, #ffffff, #f0fdf4); }
         .card-analyst.busy { border-color: #fecaca; background: linear-gradient(to bottom, #ffffff, #fef2f2); }
         .card-analyst.vacation { border-color: #fef08a; background: linear-gradient(to bottom, #ffffff, #fefce8); }
         
-        .main-action { width: 100%; padding: 20px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
+        .main-action { width: 100%; padding: 16px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.25rem; display: flex; justify-content: center; align-items: center; margin: 12px 0; }
+        @media (min-width: 768px) { .main-action { padding: 20px; font-size: 1.5rem; margin: 16px 0; } }
         .card-analyst.available .main-action { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
         .card-analyst.busy .main-action { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
         .card-analyst.vacation .main-action { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-        /* Login y Modales */
-        #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; }
-        #login-card { background: white; border-radius: 24px; padding: 40px; max-width: 420px; width: 90%; }
+        /* Login */
+        #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; padding: 16px; }
+        #login-card { background: white; border-radius: 24px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { #login-card { padding: 40px; } }
         
+        /* Tooltip Imagen */
         .tooltip-img { position: relative; cursor: pointer; }
         .tooltip-img .tooltip-content { visibility: hidden; position: absolute; z-index: 100; bottom: 120%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 12px; border: 3px solid white; background: white; padding: 4px; }
         .tooltip-img:hover .tooltip-content { visibility: visible; opacity: 1; }
         .tooltip-img .tooltip-content img { width: 180px; height: auto; border-radius: 8px; }
 
-        /* CHAT STYLES (Rediseñado) */
-        #chat-fab { position: fixed; bottom: 24px; right: 24px; z-index: 400; width: 60px; height: 60px; border-radius: 50%; background: #C5221F; color: white; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: 0 10px 25px rgba(197,34,31,0.4); transition: transform 0.2s; }
+        /* CHAT STYLES */
+        #chat-fab { position: fixed; bottom: 16px; right: 16px; z-index: 400; width: 56px; height: 56px; border-radius: 50%; background: #C5221F; color: white; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: 0 10px 25px rgba(197,34,31,0.4); transition: transform 0.2s; }
+        @media (min-width: 768px) { #chat-fab { bottom: 24px; right: 24px; width: 60px; height: 60px; } }
         #chat-fab:hover { transform: scale(1.1); }
-        #chat-panel { position: fixed; bottom: 24px; right: 24px; z-index: 450; width: 380px; height: 600px; max-height: calc(100vh - 48px); background: #f8fafc; border-radius: 20px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; }
-        #chat-panel.show { display: flex; }
-        .chat-header { background: linear-gradient(135deg, #C5221F, #991b1b); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
-        .chat-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc;}
         
-        /* Burbujas de Chat Estilo Moderno */
-        .chat-msg { display: flex; gap: 12px; max-width: 85%; animation: msgIn 0.3s; }
+        #chat-panel { position: fixed; bottom: 0; right: 0; width: 100%; height: 100%; z-index: 450; background: #f8fafc; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        @media (min-width: 768px) { #chat-panel { bottom: 24px; right: 24px; width: 380px; height: 600px; max-height: calc(100vh - 48px); border-radius: 20px; border: 1px solid #e2e8f0; } }
+        #chat-panel.show { display: flex; }
+        
+        .chat-header { background: linear-gradient(135deg, #C5221F, #991b1b); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc; }
+        
+        .chat-msg { display: flex; gap: 8px; max-width: 90%; animation: msgIn 0.3s; }
         @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .chat-msg.mine { align-self: flex-end; flex-direction: row-reverse; }
         .chat-msg:not(.mine) { align-self: flex-start; }
         
-        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; flex-shrink: 0; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .chat-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; flex-shrink: 0; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .chat-bubble-wrap { display: flex; flex-direction: column; }
-        
         .chat-msg.mine .chat-bubble-wrap { align-items: flex-end; }
-        
-        .chat-name { font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; margin-left: 4px; }
-        .chat-bubble { padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .chat-name { font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; margin-left: 4px; }
+        .chat-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .chat-msg.mine .chat-bubble { background: #C5221F; color: white; border-bottom-right-radius: 4px; }
         .chat-msg:not(.mine) .chat-bubble { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; color: #0f172a; }
-        .chat-time { font-size: 0.65rem; opacity: 0.7; margin-top: 6px; font-weight: 600; }
+        .chat-time { font-size: 0.6rem; opacity: 0.7; margin-top: 4px; font-weight: 600; }
         .chat-msg.mine .chat-time { color: #64748b; text-align: right; }
         
         .mention { background: rgba(255,255,255,0.25); font-weight: bold; padding: 2px 6px; border-radius: 4px; margin: 0 2px; }
         .chat-msg:not(.mine) .mention { background: #dcfce7; color: #166534; }
         
-        .chat-footer { padding: 12px; background: white; border-top: 1px solid #e2e8f0; }
-        .chat-input-wrap { display: flex; gap: 8px; align-items: flex-end; position: relative; background: #f1f5f9; padding: 8px; border-radius: 24px; }
-        .chat-input { flex: 1; border: none; background: transparent; padding: 8px; resize: none; font-family: inherit; max-height: 100px; outline: none; font-size: 0.9rem; }
-        .chat-send { background: #C5221F; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.2s; }
+        .chat-footer { padding: 10px; background: white; border-top: 1px solid #e2e8f0; }
+        .chat-input-wrap { display: flex; gap: 6px; align-items: flex-end; position: relative; background: #f1f5f9; padding: 6px; border-radius: 24px; }
+        .chat-input { flex: 1; border: none; background: transparent; padding: 8px; resize: none; font-family: inherit; max-height: 80px; outline: none; font-size: 0.9rem; }
+        .chat-send { background: #C5221F; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.2s; }
         .chat-send:hover { transform: scale(1.05); }
         
         #mention-menu { position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 200px; max-height: 150px; overflow-y: auto; display: none; z-index: 500; margin-bottom: 8px; }
         #mention-menu.show { display: block; }
         .mention-item { padding: 10px 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; }
         .mention-item:hover { background: #f1f5f9; color: #C5221F; }
+
+        /* Emoji Picker */
+        #emoji-picker { position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 250px; max-height: 200px; overflow-y: auto; display: none; z-index: 500; margin-bottom: 8px; padding: 8px; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        #emoji-picker.show { display: grid; }
+        .emoji-btn { font-size: 1.2rem; cursor: pointer; padding: 4px; text-align: center; border-radius: 4px; transition: background 0.2s; }
+        .emoji-btn:hover { background: #e2e8f0; }
         
         .hidden { display: none !important; }
 
         /* Gráficas contenedores */
-        .chart-card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .chart-title { font-weight: 800; font-size: 1rem; color: #0f172a; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-        .chart-canvas-wrap { position: relative; height: 280px; }
+        .chart-card { background: white; border-radius: 20px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        @media (min-width: 768px) { .chart-card { padding: 24px; } }
+        .chart-title { font-weight: 800; font-size: 0.9rem; color: #0f172a; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .chart-canvas-wrap { position: relative; height: 220px; }
+        @media (min-width: 768px) { .chart-canvas-wrap { height: 280px; } }
 
-        /* PANTALLA COMPLETA (HEADER HIDDEN) */
+        /* PANTALLA COMPLETA */
         .fullscreen-active #main-header { transform: translateY(-100%); opacity: 0; pointer-events: none; position: absolute; }
         .fullscreen-active .full-screen-wrapper { padding-top: 20px; }
     </style>
@@ -157,18 +172,31 @@
     <div id="login-screen">
         <div id="login-card">
             <div id="login-form-area">
-                <div class="text-center mb-8">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="MIDIS" class="h-12 mx-auto mb-4" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'">
+                <div class="text-center mb-6">
+                    <!-- LOGO LOCAL -->
+                    <img src="logo.png" alt="MIDIS" class="h-14 mx-auto mb-4" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
                     <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
-                    <p class="text-sm text-slate-500 mt-1">v15.0 - Gestión Integral</p>
+                    <p class="text-sm text-slate-500 mt-1">v16.0 - Gestión Integral</p>
                 </div>
                 <div class="space-y-4">
-                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Usuario</label><input type="text" id="login-user" placeholder="Ej. admin" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Usuario</label>
+                        <input type="text" id="login-user" placeholder="Ej. admin" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Contraseña</label>
+                        <div class="relative">
+                            <input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 font-semibold focus:outline-none focus:border-red-600">
+                            <!-- BOTÓN VER CONTRASEÑA -->
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-600">
+                                <i id="toggle-icon" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
-                    <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Ingresar</button>
-                    <div class="text-xs text-slate-500 text-center pt-3 border-t border-slate-100">
-                        
+                    <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Ingresar</button>
+                    <div class="text-xs text-slate-500 text-center pt-2 border-t border-slate-100">
+                       
                     </div>
                 </div>
             </div>
@@ -180,10 +208,10 @@
                     <p class="text-sm text-slate-500 mt-1">Por seguridad, debes cambiar tu contraseña.</p>
                 </div>
                 <div class="space-y-4">
-                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Nueva Contraseña</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label><input type="password" id="confirm-pass" placeholder="Repite la contraseña" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Confirmar Contraseña</label><input type="password" id="confirm-pass" placeholder="Repite la contraseña" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
                     <div id="change-pass-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
-                    <button onclick="guardarNuevaPassword()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Guardar y Entrar</button>
+                    <button onclick="guardarNuevaPassword()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Guardar y Entrar</button>
                 </div>
             </div>
         </div>
@@ -191,48 +219,50 @@
 
     <!-- MODALES Y TOASTS -->
     <div id="photo-modal" class="fixed inset-0 bg-black/80 z-[999] hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
-        <div class="bg-white p-4 rounded-2xl max-w-3xl max-h-[90vh] overflow-auto relative" onclick="event.stopPropagation()">
-            <button onclick="cerrarModalFoto()" class="absolute top-3 right-3 text-slate-500 hover:text-red-600 text-2xl font-bold bg-white/80 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 id="modal-foto-title" class="text-base font-bold text-slate-800 mb-3 hidden"></h3>
-            <img id="modal-img-element" src="" alt="Evidencia" class="w-full h-auto rounded-xl object-contain">
+        <div class="bg-white p-2 md:p-4 rounded-xl md:rounded-2xl max-w-3xl max-h-[90vh] overflow-auto relative w-full" onclick="event.stopPropagation()">
+            <button onclick="cerrarModalFoto()" class="absolute top-2 right-2 text-slate-500 hover:text-red-600 text-xl font-bold bg-white/80 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-foto-title" class="text-sm font-bold text-slate-800 mb-2 hidden"></h3>
+            <img id="modal-img-element" src="" alt="Evidencia" class="w-full h-auto rounded-lg object-contain">
         </div>
     </div>
-    <div id="toast-container" class="fixed bottom-6 right-6 z-[1000] flex flex-col gap-2"></div>
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[1000] flex flex-col gap-2 w-[calc(100%-32px)] md:w-auto"></div>
     
     <!-- NOTIFICACIÓN CHAT -->
-    <div id="chat-notification" class="fixed top-24 right-6 z-[500] bg-white rounded-2xl p-4 flex gap-3 border-l-4 border-red-600 shadow-2xl transform translate-x-[150%] transition-transform duration-300 cursor-pointer" onclick="toggleChatPanel()">
-        <div id="chat-notif-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-red-600">?</div>
+    <div id="chat-notification" class="fixed top-20 right-4 z-[500] bg-white rounded-xl p-3 flex gap-3 border-l-4 border-red-600 shadow-xl transform translate-x-[150%] transition-transform duration-300 cursor-pointer w-[calc(100%-32px)] md:w-auto" onclick="toggleChatPanel()">
+        <div id="chat-notif-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-red-600 shrink-0">?</div>
         <div><div id="chat-notif-name" class="font-bold text-sm text-slate-900"></div><div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div></div>
     </div>
 
-    <!-- HEADER (NUEVO DISEÑO CON FORMATO DE IMAGEN) -->
+    <!-- HEADER -->
     <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 hidden transition-all duration-500">
-        <div class="w-full px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-5">
-                <!-- Logo MIDIS en recuadro blanco -->
-                <div class="bg-white px-4 py-2 rounded-xl shadow-lg border border-white/20 flex items-center justify-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="MIDIS" class="h-8 object-contain" onerror="this.src='https://placehold.co/100x30/C5221F/ffffff?text=MIDIS'">
+        <div class="w-full px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+            <div class="flex items-center gap-3 md:gap-5 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-3 md:gap-5">
+                    <div class="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl shadow-lg border border-white/20 flex items-center justify-center">
+                        <img src="logo.png" alt="MIDIS" class="h-6 md:h-8 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
+                    </div>
+                    <div>
+                        <h1 class="text-sm md:text-2xl font-extrabold tracking-tight flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-3 leading-tight">
+                            OGTI - Control de atenciones 
+                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-widest font-bold shadow-inner w-max">MESA DE AYUDA</span>
+                        </h1>
+                        <p class="text-[10px] md:text-sm text-red-100 font-medium mt-0.5 hidden md:block">Oficina General de Tecnologías de la Información | MIDIS</p>
+                    </div>
                 </div>
-                <!-- Títulos -->
-                <div>
-                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight flex items-center gap-3">
-                        OGTI - Control de atenciones 
-                        <span class="text-[10px] bg-red-900/80 border border-red-500 text-white px-3 py-1 rounded-full uppercase tracking-widest font-bold shadow-inner">MESA DE AYUDA</span>
-                    </h1>
-                    <p class="text-xs md:text-sm text-red-100 font-medium mt-1">Oficina General de Tecnologías de la Información | Ministerio de Desarrollo e Inclusión Social</p>
-                </div>
+                <!-- Botón Salir en móvil -->
+                <button onclick="cerrarSesion()" id="btn-logout-mobile" class="md:hidden text-white bg-black/40 p-2 rounded-lg text-sm"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2">
-                <div id="user-info" class="hidden flex items-center gap-2 bg-black/20 border border-white/20 rounded-xl px-3 py-1.5">
-                    <i class="fa-solid fa-user-circle text-lg"></i>
-                    <div class="text-xs"><div id="user-name-display" class="font-bold"></div><div id="user-role-display" class="text-[10px] text-red-200 uppercase"></div></div>
+            <div class="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                <div id="user-info" class="hidden flex items-center gap-2 bg-black/20 border border-white/20 rounded-lg px-2 py-1">
+                    <i class="fa-solid fa-user-circle text-base"></i>
+                    <div class="text-[10px]"><div id="user-name-display" class="font-bold"></div><div id="user-role-display" class="text-red-200 uppercase"></div></div>
                 </div>
-                <button onclick="switchView('operador')" id="btn-op" class="hidden px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-headset mr-2"></i> Panel Operador</button>
-                <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-chart-column mr-2"></i> Módulos y Ranking</button>
-                <button onclick="switchView('historial')" id="btn-hist" class="hidden px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Historial</button>
-                <button onclick="switchView('usuarios')" id="btn-users" class="hidden px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-amber-500/80 hover:bg-amber-500 text-white transition"><i class="fa-solid fa-users-gear mr-2"></i> Usuarios</button>
-                <button onclick="cerrarSesion()" id="btn-logout" class="hidden px-3 py-2 bg-black/40 hover:bg-black/60 text-white rounded-xl font-bold text-sm transition"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button onclick="switchView('operador')" id="btn-op" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-headset mr-1"></i> Operador</button>
+                <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-chart-column mr-1"></i> Módulos</button>
+                <button onclick="switchView('historial')" id="btn-hist" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
+                <button onclick="switchView('usuarios')" id="btn-users" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-amber-500/80 hover:bg-amber-500 text-white transition"><i class="fa-solid fa-users-gear mr-1"></i> Usuarios</button>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden md:block px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white rounded-lg font-bold text-sm transition"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </div>
     </header>
@@ -240,59 +270,59 @@
     <main id="main-content" class="full-screen-wrapper w-full flex-grow hidden">
         
         <!-- VIEW: OPERADOR -->
-        <div id="view-operador" class="space-y-6 w-full hidden">
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-pen-to-square text-red-600 mr-2"></i> Registrar Atención</h2>
-                    <button onclick="limpiarRegistros()" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash-can"></i> Limpiar Todo</button>
+        <div id="view-operador" class="space-y-4 md:space-y-6 w-full hidden">
+            <div class="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-3 md:mb-4">
+                    <h2 class="text-base md:text-lg font-extrabold text-slate-800"><i class="fa-solid fa-pen-to-square text-red-600 mr-1"></i> Registrar</h2>
+                    <button onclick="limpiarRegistros()" class="text-red-500 hover:text-red-700 text-[10px] md:text-xs font-bold"><i class="fa-solid fa-trash-can"></i> Limpiar</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-end">
                     <div class="md:col-span-3">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Analista Soporte</label>
-                        <select id="op-nombre" onchange="limpiarFormularioTicket()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm"></select>
+                        <label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Analista</label>
+                        <select id="op-nombre" onchange="limpiarFormularioTicket()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm"></select>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Estado</label>
-                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm" onchange="verificarEstadoLibre()">
+                        <label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Estado</label>
+                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm" onchange="verificarEstadoLibre()">
                             <option value="libre">🟢 Libre</option>
                             <option value="ocupado">🔴 Ocupado</option>
                             <option value="vacaciones">🟡 Vacaciones</option>
                         </select>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Ticket iTop</label>
-                        <input type="text" id="op-ticket" placeholder="R-006781" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm uppercase font-mono">
+                        <label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Ticket iTop</label>
+                        <input type="text" id="op-ticket" placeholder="R-006781" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm uppercase font-mono">
                     </div>
                     <div class="md:col-span-3">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Evidencia (Ctrl+V)</label>
-                        <div class="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 text-center cursor-pointer hover:bg-slate-100 relative flex items-center justify-center h-[42px] overflow-hidden" onclick="document.getElementById('op-foto-file').click()">
-                            <span id="preview-text" class="text-xs text-slate-500"><i class="fa-solid fa-camera"></i> Adjuntar o Pegar</span>
+                        <label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Evidencia (Ctrl+V)</label>
+                        <div class="border-2 border-dashed border-slate-300 rounded-lg bg-slate-50 text-center cursor-pointer hover:bg-slate-100 relative flex items-center justify-center h-[34px] md:h-[42px] overflow-hidden" onclick="document.getElementById('op-foto-file').click()">
+                            <span id="preview-text" class="text-[10px] md:text-xs text-slate-500"><i class="fa-solid fa-camera"></i> Adjuntar</span>
                             <img id="foto-preview" class="hidden absolute inset-0 w-full h-full object-cover">
                             <input type="file" id="op-foto-file" accept="image/*" class="hidden">
                         </div>
                         <input type="hidden" id="op-foto-base64">
                     </div>
                     <div class="md:col-span-2">
-                        <button onclick="guardarAtencion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-sm transition"><i class="fa-solid fa-save mr-1"></i> Guardar</button>
+                        <button onclick="guardarAtencion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition"><i class="fa-solid fa-save mr-1"></i> Guardar</button>
                     </div>
                     <div class="md:col-span-12" id="comentario-container" style="display:none;">
-                        <label class="block text-xs font-bold text-emerald-700 mb-1">Comentario (Visible para el analista)</label>
-                        <textarea id="op-comentario" rows="2" placeholder="Escriba aquí los detalles de la atención..." class="w-full bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"></textarea>
+                        <label class="block text-[10px] md:text-xs font-bold text-emerald-700 mb-1">Comentario (Visible para el analista)</label>
+                        <textarea id="op-comentario" rows="2" placeholder="Detalles de la atención..." class="w-full bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:border-emerald-500"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla Operador -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <table>
+            <!-- Tabla Operador Responsiva -->
+            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="min-w-full">
                     <thead>
                         <tr>
-                            <th>ANALISTA SOPORTE</th>
+                            <th>ANALISTA</th>
                             <th>ESTADO</th>
-                            <th>TICKET EN ATENCIÓN</th>
-                            <th>EVIDENCIA FOTO</th>
-                            <th>PROGRESO TOTAL DE ATENCIONES</th>
-                            <th>TIEMPO TRANSCURRIDO</th>
+                            <th>TICKET</th>
+                            <th>EVIDENCIA</th>
+                            <th>PROGRESO</th>
+                            <th>TIEMPO</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-analistas-general"></tbody>
@@ -301,93 +331,92 @@
         </div>
 
         <!-- VIEW: RANKING Y MODULOS -->
-        <div id="view-ranking" class="space-y-6 w-full hidden">
+        <div id="view-ranking" class="space-y-4 md:space-y-6 w-full hidden">
             
-            <!-- TARJETA EXCLUSIVA PARA ANALISTAS -->
-            <div id="analista-dashboard" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+            <!-- TARJETA EXCLUSIVA PARA ANALISTAS (Responsiva) -->
+            <div id="analista-dashboard" class="hidden bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl font-extrabold" id="ana-initial">A</div>
+                    <div class="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl md:text-2xl font-extrabold shrink-0" id="ana-initial">A</div>
                         <div>
-                            <h2 class="text-xl font-extrabold text-slate-800" id="ana-name">Nombre del Analista</h2>
-                            <p class="text-sm text-slate-500 font-semibold">Mi Panel de Atenciones</p>
+                            <h2 class="text-lg md:text-xl font-extrabold text-slate-800" id="ana-name">Nombre</h2>
+                            <p class="text-xs md:text-sm text-slate-500 font-semibold">Mi Panel</p>
                         </div>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 w-full md:w-auto">
-                        <div class="flex justify-between items-center gap-6 mb-2">
+                    <div class="bg-slate-50 p-3 md:p-4 rounded-lg md:rounded-xl border border-slate-200 w-full md:w-auto flex flex-col gap-2">
+                        <div class="flex justify-between items-center gap-4">
                             <div>
-                                <div class="text-xs font-bold text-slate-500 uppercase">Ticket Asignado</div>
-                                <div class="text-2xl font-mono font-extrabold text-red-600" id="ana-ticket">LIBRE</div>
+                                <div class="text-[10px] md:text-xs font-bold text-slate-500 uppercase">Ticket</div>
+                                <div class="text-xl md:text-2xl font-mono font-extrabold text-red-600" id="ana-ticket">LIBRE</div>
                             </div>
                             <div class="text-right">
-                                <div class="text-xs font-bold text-slate-500 uppercase">Fecha/Hora Asignación</div>
-                                <div class="text-sm font-bold text-slate-800" id="ana-fecha">-</div>
+                                <div class="text-[10px] md:text-xs font-bold text-slate-500 uppercase">Fecha/Hora</div>
+                                <div class="text-xs md:text-sm font-bold text-slate-800" id="ana-fecha">-</div>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200 mt-2" id="ana-comentario">
-                            Sin comentarios adicionales.
+                        <div class="text-[10px] md:text-xs text-slate-600 bg-white p-2 rounded border border-slate-200" id="ana-comentario">
+                            Sin comentarios.
                         </div>
-                        <button id="btn-finalizar-atencion" onclick="finalizarAtencionAnalista()" class="hidden w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-sm transition">
+                        <button id="btn-finalizar-atencion" onclick="finalizarAtencionAnalista()" class="hidden w-full mt-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs md:text-sm transition">
                             <i class="fa-solid fa-check-circle mr-1"></i> Finalizar Atención
                         </button>
                     </div>
                 </div>
-                <div class="mt-6 border-t border-slate-100 pt-4">
-                    <h3 class="font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> Mis atenciones de la semana</h3>
-                    <div class="h-48 w-full max-w-sm mx-auto"><canvas id="chart-analista-semana"></canvas></div>
+                <div class="mt-4 md:mt-6 border-t border-slate-100 pt-3 md:pt-4">
+                    <h3 class="text-sm md:text-base font-bold text-slate-700 mb-2 md:mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-1"></i> Mis atenciones de la semana</h3>
+                    <div class="h-40 md:h-48 w-full max-w-sm mx-auto"><canvas id="chart-analista-semana"></canvas></div>
                 </div>
             </div>
 
-            <!-- BARRA SUPERIOR DE MODULOS CON RELOJ GRANDE Y BOTÓN FULLSCREEN -->
-            <div class="flex flex-col xl:flex-row justify-between items-center mb-2 gap-4">
-                <h2 class="text-2xl font-extrabold text-slate-800 flex items-center gap-3">
-                    <i class="fa-solid fa-display text-emerald-600"></i> MÓDULOS Y RANKING
+            <!-- BARRA SUPERIOR DE MODULOS -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-2 gap-3 md:gap-4">
+                <h2 class="text-lg md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-display text-emerald-600"></i> MÓDULOS
                 </h2>
-                <div class="flex items-center gap-4">
-                    <!-- Botón Pantalla Completa -->
-                    <button onclick="toggleFullScreen()" id="btn-fullscreen" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 shadow-sm border border-slate-300" title="Pantalla Completa">
-                        <i class="fa-solid fa-expand text-xl"></i> <span class="hidden md:inline">Pantalla Completa</span>
+                <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
+                    <button onclick="toggleFullScreen()" id="btn-fullscreen" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-bold transition flex items-center gap-1 md:gap-2 shadow-sm border border-slate-300 text-xs md:text-sm" title="Pantalla Completa">
+                        <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Pantalla Completa</span>
                     </button>
                     
-                    <!-- Reloj Gigante para TV -->
-                    <div class="bg-slate-900 text-emerald-400 px-8 py-3 rounded-2xl font-mono font-black text-4xl md:text-5xl tracking-widest border-4 border-slate-700 shadow-2xl" id="live-clock">--:--:--</div>
+                    <!-- Reloj para TV -->
+                    <div class="bg-slate-900 text-emerald-400 px-4 py-1.5 md:px-8 md:py-3 rounded-lg md:rounded-2xl font-mono font-black text-xl md:text-5xl tracking-widest border-2 md:border-4 border-slate-700 shadow-2xl" id="live-clock">--:--:--</div>
                 </div>
             </div>
             
             <!-- Tarjetas Módulos -->
-            <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+            <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
 
             <!-- GRÁFICAS GLOBALES -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mt-6 md:mt-8">
                 <div class="chart-card">
-                    <div class="chart-title"><i class="fa-solid fa-chart-simple text-red-600"></i> CARGA: REQ. (VERDE) VS INC. (ROJO)</div>
+                    <div class="chart-title"><i class="fa-solid fa-chart-simple text-red-600"></i> CARGA: REQ. VS INC.</div>
                     <div class="chart-canvas-wrap"><canvas id="chart-barras-global"></canvas></div>
                 </div>
                 <div class="chart-card">
-                    <div class="chart-title"><i class="fa-solid fa-chart-pie text-red-600"></i> DISTRIBUCIÓN GLOBAL OGTI</div>
+                    <div class="chart-title"><i class="fa-solid fa-chart-pie text-red-600"></i> DISTRIBUCIÓN GLOBAL</div>
                     <div class="chart-canvas-wrap"><canvas id="chart-dona-global"></canvas></div>
                 </div>
             </div>
         </div>
 
         <!-- VIEW: HISTORIAL -->
-        <div id="view-historial" class="space-y-6 w-full hidden">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-red-600"></i> Historial General de Atenciones</h2>
-                    <div class="flex gap-2">
-                        <input type="text" id="hist-search" placeholder="Buscar por ticket o nombre..." class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm w-64">
-                        <button onclick="exportarHistorialCSV()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900"><i class="fa-solid fa-file-csv"></i></button>
+        <div id="view-historial" class="space-y-4 md:space-y-6 w-full hidden">
+            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 gap-3">
+                    <h2 class="text-base md:text-xl font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-red-600"></i> Historial</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input type="text" id="hist-search" placeholder="Buscar..." class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs md:text-sm flex-grow md:w-64">
+                        <button onclick="exportarHistorialCSV()" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-slate-900"><i class="fa-solid fa-file-csv"></i></button>
                     </div>
                 </div>
-                <div class="overflow-hidden rounded-xl border border-slate-200">
-                    <table>
+                <div class="overflow-x-auto rounded-lg md:rounded-xl border border-slate-200">
+                    <table class="min-w-full">
                         <thead>
                             <tr>
                                 <th>FECHA Y HORA</th>
-                                <th>ANALISTA SOPORTE</th>
-                                <th>REQUERIMIENTO / INCIDENTE</th>
-                                <th style="text-align: center;">EVIDENCIA FOTOGRÁFICA</th>
+                                <th>ANALISTA</th>
+                                <th>TICKET</th>
+                                <th style="text-align: center;">EVIDENCIA</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-historial"></tbody>
@@ -397,27 +426,27 @@
         </div>
 
         <!-- VIEW: USUARIOS -->
-        <div id="view-usuarios" class="space-y-6 w-full hidden">
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h2 class="text-xl font-extrabold text-slate-800"><i class="fa-solid fa-users-gear text-amber-600 mr-2"></i> Gestión de Usuarios</h2>
+        <div id="view-usuarios" class="space-y-4 md:space-y-6 w-full hidden">
+            <div class="bg-white rounded-xl md:rounded-3xl p-4 md:p-8 shadow-xl">
+                <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b">
+                    <h2 class="text-base md:text-xl font-extrabold text-slate-800"><i class="fa-solid fa-users-gear text-amber-600 mr-1"></i> Usuarios</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Usuario</label><input type="text" id="new-user-name" placeholder="juan.perez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Nombre Real</label><input type="text" id="new-user-realname" placeholder="Juan Pérez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6 bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-200">
+                    <div><label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Usuario</label><input type="text" id="new-user-name" placeholder="juan.perez" class="w-full border rounded-lg px-2 py-1.5 text-xs md:text-sm"></div>
+                    <div><label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Nombre Real</label><input type="text" id="new-user-realname" placeholder="Juan Pérez" class="w-full border rounded-lg px-2 py-1.5 text-xs md:text-sm"></div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Rol Inicial</label>
-                        <select id="new-user-role" class="w-full border rounded-xl px-3 py-2 text-sm">
+                        <label class="block text-[10px] md:text-xs font-bold text-slate-600 mb-1">Rol Inicial</label>
+                        <select id="new-user-role" class="w-full border rounded-lg px-2 py-1.5 text-xs md:text-sm">
                             <option value="analista">Analista</option>
                             <option value="operador">Operador</option>
                             <option value="admin">Administrador</option>
                         </select>
                     </div>
-                    <div class="flex items-end"><button onclick="crearUsuario()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Crear</button></div>
+                    <div class="flex items-end"><button onclick="crearUsuario()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 md:py-2 rounded-lg transition text-xs md:text-sm"><i class="fa-solid fa-plus mr-1"></i> Crear</button></div>
                 </div>
-                <div class="table-responsive border rounded-xl">
-                    <table>
-                        <thead><tr><th>USUARIO</th><th>NOMBRE REAL</th><th>ROL (Editable)</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                <div class="overflow-x-auto border rounded-lg md:rounded-xl">
+                    <table class="min-w-full">
+                        <thead><tr><th>USUARIO</th><th>NOMBRE</th><th>ROL</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
                         <tbody id="tabla-usuarios"></tbody>
                     </table>
                 </div>
@@ -428,7 +457,7 @@
     <!-- CHAT FLOTANTE MULTIUSUARIO -->
     <button id="chat-fab" class="hidden" onclick="toggleChatPanel()">
         <i class="fa-solid fa-comments"></i>
-        <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">0</span>
+        <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">0</span>
     </button>
     
     <div id="chat-panel">
@@ -446,11 +475,16 @@
         <div class="chat-footer">
             <img id="chat-photo-preview" class="hidden max-h-16 rounded-lg mb-2 border-2 border-red-600">
             <div class="chat-input-wrap">
+                <!-- Menú de menciones -->
                 <div id="mention-menu"></div>
-                <button onclick="document.getElementById('chat-file').click()" class="text-slate-400 hover:text-red-600 px-2 pb-2 transition"><i class="fa-solid fa-camera text-xl"></i></button>
+                <!-- Menú de Emojis -->
+                <div id="emoji-picker"></div>
+                
+                <button onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-yellow-500 px-1 pb-1 transition"><i class="fa-regular fa-face-smile text-xl"></i></button>
+                <button onclick="document.getElementById('chat-file').click()" class="text-slate-400 hover:text-red-600 px-1 pb-1 transition"><i class="fa-solid fa-camera text-xl"></i></button>
                 <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="procesarFotoChat(event)">
                 <textarea id="chat-input" class="chat-input" rows="1" placeholder="Escribe un mensaje..."></textarea>
-                <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane text-sm"></i></button>
             </div>
         </div>
     </div>
@@ -503,36 +537,98 @@
         function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
 
         /* ============================================
-           PANTALLA COMPLETA
+           LOGIN Y CONTRASEÑA
            ============================================ */
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    mostrarToast(`Error al activar pantalla completa: ${err.message}`, 'error');
-                });
+        function togglePasswordVisibility() {
+            const input = document.getElementById('login-pass');
+            const icon = document.getElementById('toggle-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
 
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                // Ocultar header suavemente
-                document.getElementById('main-header').style.transform = 'translateY(-100%)';
-                document.getElementById('main-header').style.opacity = '0';
-                document.getElementById('main-header').style.position = 'absolute';
-            } else {
-                // Mostrar header
-                document.getElementById('main-header').style.transform = 'translateY(0)';
-                document.getElementById('main-header').style.opacity = '1';
-                document.getElementById('main-header').style.position = 'sticky';
+        function intentarLogin() {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const err = document.getElementById('login-error');
+            
+            if (!usuariosData[user]) { err.textContent = '❌ Usuario no encontrado.'; err.classList.remove('hidden'); return; }
+            if (usuariosData[user].pass !== pass) { err.textContent = '❌ Contraseña incorrecta.'; err.classList.remove('hidden'); return; }
+            
+            err.classList.add('hidden');
+            if (usuariosData[user].debeCambiar) {
+                usuarioCambiandoPass = user;
+                document.getElementById('login-form-area').classList.add('hidden');
+                document.getElementById('change-pass-area').classList.remove('hidden');
+                return;
             }
-        });
+            sesionActual = { user, ...usuariosData[user] };
+            sessionStorage.setItem('ogti_session_v16', JSON.stringify(sesionActual));
+            iniciarSesionUI();
+        }
+
+        function guardarNuevaPassword() {
+            const p1 = document.getElementById('new-pass').value;
+            const p2 = document.getElementById('confirm-pass').value;
+            const err = document.getElementById('change-pass-error');
+            if (p1.length < 6) { err.textContent = '⚠️ Mínimo 6 caracteres.'; err.classList.remove('hidden'); return; }
+            if (p1 !== p2) { err.textContent = '⚠️ No coinciden.'; err.classList.remove('hidden'); return; }
+            err.classList.add('hidden');
+            const user = usuarioCambiandoPass;
+            
+            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
+                usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
+                sesionActual = { user, ...usuariosData[user] };
+                sessionStorage.setItem('ogti_session_v16', JSON.stringify(sesionActual));
+                iniciarSesionUI();
+            });
+        }
+
+        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v16'); location.reload(); }
+        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v16'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
+
+        function iniciarSesionUI() {
+            if (!sesionActual) return;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('btn-logout').classList.remove('hidden');
+            document.getElementById('chat-fab').classList.remove('hidden');
+            document.getElementById('user-name-display').textContent = sesionActual.nombre;
+            document.getElementById('user-role-display').textContent = sesionActual.rol;
+            
+            const rol = sesionActual.rol;
+            document.getElementById('btn-rank').classList.remove('hidden'); 
+            
+            if (rol === 'admin') {
+                document.getElementById('btn-op').classList.remove('hidden');
+                document.getElementById('btn-hist').classList.remove('hidden');
+                document.getElementById('btn-users').classList.remove('hidden');
+            } else if (rol === 'operador') {
+                document.getElementById('btn-op').classList.remove('hidden');
+                document.getElementById('btn-hist').classList.remove('hidden');
+            }
+            
+            if (rol === 'analista') {
+                document.getElementById('analista-dashboard').classList.remove('hidden');
+                renderAnalistaDashboard();
+            } else {
+                document.getElementById('analista-dashboard').classList.add('hidden');
+            }
+            
+            switchView('ranking');
+            iniciarReloj();
+        }
 
         /* ============================================
-           FIREBASE
+           FIREBASE Y LOGICA DE ANALISTAS
            ============================================ */
         function iniciarEscuchasFirebase() {
             const usersRef = window.firebaseRef(window.firebaseDB, 'usuarios');
@@ -586,84 +682,6 @@
             });
         }
 
-        /* ============================================
-           LOGIN
-           ============================================ */
-        function intentarLogin() {
-            const user = document.getElementById('login-user').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
-            const err = document.getElementById('login-error');
-            
-            if (!usuariosData[user]) { err.textContent = '❌ Usuario no encontrado.'; err.classList.remove('hidden'); return; }
-            if (usuariosData[user].pass !== pass) { err.textContent = '❌ Contraseña incorrecta.'; err.classList.remove('hidden'); return; }
-            
-            err.classList.add('hidden');
-            if (usuariosData[user].debeCambiar) {
-                usuarioCambiandoPass = user;
-                document.getElementById('login-form-area').classList.add('hidden');
-                document.getElementById('change-pass-area').classList.remove('hidden');
-                return;
-            }
-            sesionActual = { user, ...usuariosData[user] };
-            sessionStorage.setItem('ogti_session_v15', JSON.stringify(sesionActual));
-            iniciarSesionUI();
-        }
-
-        function guardarNuevaPassword() {
-            const p1 = document.getElementById('new-pass').value;
-            const p2 = document.getElementById('confirm-pass').value;
-            const err = document.getElementById('change-pass-error');
-            if (p1.length < 6) { err.textContent = '⚠️ Mínimo 6 caracteres.'; err.classList.remove('hidden'); return; }
-            if (p1 !== p2) { err.textContent = '⚠️ No coinciden.'; err.classList.remove('hidden'); return; }
-            err.classList.add('hidden');
-            const user = usuarioCambiandoPass;
-            
-            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
-                usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
-                sesionActual = { user, ...usuariosData[user] };
-                sessionStorage.setItem('ogti_session_v15', JSON.stringify(sesionActual));
-                iniciarSesionUI();
-            });
-        }
-
-        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v15'); location.reload(); }
-        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v15'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
-
-        function iniciarSesionUI() {
-            if (!sesionActual) return;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-header').classList.remove('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-info').classList.remove('hidden');
-            document.getElementById('btn-logout').classList.remove('hidden');
-            document.getElementById('chat-fab').classList.remove('hidden');
-            document.getElementById('user-name-display').textContent = sesionActual.nombre;
-            document.getElementById('user-role-display').textContent = sesionActual.rol;
-            
-            const rol = sesionActual.rol;
-            document.getElementById('btn-rank').classList.remove('hidden'); 
-            
-            if (rol === 'admin') {
-                document.getElementById('btn-op').classList.remove('hidden');
-                document.getElementById('btn-hist').classList.remove('hidden');
-                document.getElementById('btn-users').classList.remove('hidden');
-            } else if (rol === 'operador') {
-                document.getElementById('btn-op').classList.remove('hidden');
-                document.getElementById('btn-hist').classList.remove('hidden');
-            }
-            
-            if (rol === 'analista') {
-                document.getElementById('analista-dashboard').classList.remove('hidden');
-                renderAnalistaDashboard();
-            } else {
-                document.getElementById('analista-dashboard').classList.add('hidden');
-            }
-            
-            switchView('ranking');
-            iniciarReloj();
-        }
-
-        // Panel del analista
         function renderAnalistaDashboard() {
             if (sesionActual?.rol !== 'analista') return;
             const nombre = sesionActual.nombre;
@@ -680,7 +698,7 @@
             if (a) {
                 if (a.estado === 'ocupado') {
                     txtTicket.textContent = a.ticket;
-                    txtTicket.className = 'text-2xl font-mono font-extrabold text-red-600';
+                    txtTicket.className = 'text-xl md:text-2xl font-mono font-extrabold text-red-600';
                     
                     if (a.startTime) txtFecha.textContent = new Date(a.startTime).toLocaleString('es-PE');
                     else txtFecha.textContent = '-';
@@ -689,9 +707,9 @@
                     btnFinalizar.classList.remove('hidden');
                 } else {
                     txtTicket.textContent = a.estado === 'vacaciones' ? 'VACACIONES' : 'LIBRE';
-                    txtTicket.className = 'text-2xl font-mono font-extrabold text-emerald-600';
+                    txtTicket.className = 'text-xl md:text-2xl font-mono font-extrabold text-emerald-600';
                     txtFecha.textContent = '-';
-                    txtComentario.textContent = 'No tienes ninguna atención asignada en este momento.';
+                    txtComentario.textContent = 'No tienes atención asignada.';
                     btnFinalizar.classList.add('hidden');
                 }
             }
@@ -713,12 +731,8 @@
             chartAnalista = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Requerimientos (R)', 'Incidentes (I)'],
-                    datasets: [{
-                        data: [reqs, incs],
-                        backgroundColor: ['#059669', '#C5221F'],
-                        borderWidth: 0
-                    }]
+                    labels: ['Req (R)', 'Inc (I)'],
+                    datasets: [{ data: [reqs, incs], backgroundColor: ['#059669', '#C5221F'], borderWidth: 0 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
             });
@@ -745,30 +759,8 @@
             renderAnalistaDashboard();
         }
 
-        function iniciarReloj() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const el = document.getElementById('live-clock');
-                if (el) el.textContent = new Date().toLocaleTimeString('es-PE');
-                actualizarTiemposVista();
-            }, 1000);
-        }
-
-        function switchView(v) {
-            if (!sesionActual) return;
-            if (sesionActual.rol === 'analista' && v !== 'ranking') { v = 'ranking'; }
-            
-            ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
-            document.getElementById(`view-${v}`).classList.remove('hidden');
-            
-            if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
-            else if (v === 'ranking') { renderRankingYModulos(); if (sesionActual.rol === 'analista') renderAnalistaDashboard(); }
-            else if (v === 'historial') renderHistorial();
-            else if (v === 'usuarios') renderTablaUsuarios();
-        }
-
         /* ============================================
-           OPERADOR Y EVIDENCIA
+           OPERADOR Y ALERTAS
            ============================================ */
         function poblarSelectAnalistas() {
             const s = document.getElementById('op-nombre');
@@ -907,6 +899,7 @@
             historialData.unshift(nuevoHistorial);
             await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
             
+            // ALERTA SONORA Y NOTIFICACIÓN
             reproducirAlertaTicket(`${ticketSel} para ${nombreSel}`);
             enviarNotificacionPush("Nueva Atención OGTI", `Ticket ${ticketSel} asignado a ${nombreSel}`);
             
@@ -918,7 +911,7 @@
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
-                m.lang='es-PE'; m.rate=1.05; m.volume=1;
+                m.lang='es-PE'; m.rate=1.05; m.volume=1; // Volumen al máximo
                 setTimeout(() => window.speechSynthesis.speak(m), 300);
             }
         }
@@ -927,13 +920,13 @@
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(titulo, {
                     body: cuerpo,
-                    icon: "https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png"
+                    icon: "logo.png" // Usa tu logo local
                 });
             }
         }
 
         /* ============================================
-           RENDERS Y GRÁFICAS
+           RENDERS
            ============================================ */
         function calcularTiempo(startTime) {
             if (!startTime) return { text: '-', critical: false };
@@ -951,7 +944,7 @@
                     const start = parseInt(el.getAttribute('data-start'));
                     const { text, critical } = calcularTiempo(start);
                     el.innerHTML = critical 
-                        ? `<span class="time-badge time-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${text} (> 1h)</span>`
+                        ? `<span class="time-badge time-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${text}</span>`
                         : `<span class="time-badge time-normal"><i class="fa-regular fa-clock"></i> ${text}</span>`;
                 });
             }
@@ -977,7 +970,7 @@
                 const pct = Math.round((total / maxTotal) * 100);
                 let fotoHtml = '<span class="text-slate-400">-</span>';
                 if (a.foto) {
-                    fotoHtml = `<button onclick="abrirModalFoto('${a.foto}', '${escapeHtml(a.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700 text-lg"><i class="fa-solid fa-image"></i></button>`;
+                    fotoHtml = `<button onclick="abrirModalFoto('${a.foto}', '${escapeHtml(a.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700 text-base"><i class="fa-solid fa-image"></i></button>`;
                 }
                 let timeHtml = '<span class="text-slate-400">-</span>';
                 if (a.estado === 'ocupado' && a.startTime) {
@@ -987,22 +980,21 @@
                 let statusPill = '';
                 let statusDot = '';
                 if (a.estado === 'ocupado') {
-                    statusPill = 'OCUPADO (Atendiendo)'; statusDot = 'dot-red';
+                    statusPill = 'OCUPADO'; statusDot = 'dot-red';
                 } else if (a.estado === 'vacaciones') {
                     statusPill = 'VACACIONES'; statusDot = 'dot-yellow';
                 } else {
-                    statusPill = 'LIBRE (Disponible)'; statusDot = 'dot-green';
+                    statusPill = 'LIBRE'; statusDot = 'dot-green';
                 }
 
                 html += `<tr>
-                    <td class="font-bold text-slate-800">${escapeHtml(a.nombre)}</td>
+                    <td class="font-bold text-slate-800 text-xs md:text-sm">${escapeHtml(a.nombre)}</td>
                     <td>
                         <span class="status-pill status-${a.estado}">
-                            <span class="${statusDot}"></span>
-                            ${statusPill}
+                            <span class="${statusDot}"></span> ${statusPill}
                         </span>
                     </td>
-                    <td class="font-mono text-slate-700">${escapeHtml(a.ticket)}</td>
+                    <td class="font-mono text-slate-700 text-xs md:text-sm">${escapeHtml(a.ticket)}</td>
                     <td>${fotoHtml}</td>
                     <td>
                         <div class="progress-wrapper">
@@ -1031,7 +1023,7 @@
                 }
                 const clickAttr = (busy && a.foto) ? `onclick="abrirModalFoto('${a.foto}', '${escapeHtml(a.comentario || 'Sin comentario')}')"` : '';
                 
-                let timeHtml = '<span class="text-sm font-semibold text-slate-500">-</span>';
+                let timeHtml = '<span class="text-xs font-semibold text-slate-500">-</span>';
                 if (busy && a.startTime) {
                     timeHtml = `<span class="time-live" data-start="${a.startTime}">...</span>`;
                 }
@@ -1049,13 +1041,13 @@
 
                 html += `<div class="card-analyst ${cardClass} ${busy && a.foto ? 'tooltip-img' : ''}" ${clickAttr}>
                     ${tooltip}
-                    <div class="text-xs font-extrabold uppercase tracking-wider mb-2 ${textClass}">
+                    <div class="text-[10px] md:text-xs font-extrabold uppercase tracking-wider mb-1 md:mb-2 ${textClass}">
                         ${statusLabel}
                     </div>
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-3">${escapeHtml(a.nombre)}</h3>
-                    <div class="main-action font-mono ${vac ? 'text-lg' : ''}">${actionLabel}</div>
-                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-200/50">
-                        <span class="text-xs font-bold text-slate-500">Tiempo de atención:</span>
+                    <h3 class="text-base md:text-lg font-extrabold text-slate-900 mb-2 md:mb-3 truncate">${escapeHtml(a.nombre)}</h3>
+                    <div class="main-action font-mono ${vac ? 'text-base md:text-lg' : ''}">${actionLabel}</div>
+                    <div class="flex justify-between items-center mt-2 md:mt-4 pt-2 md:pt-3 border-t border-slate-200/50">
+                        <span class="text-[10px] md:text-xs font-bold text-slate-500">Tiempo:</span>
                         ${timeHtml}
                     </div>
                 </div>`;
@@ -1079,14 +1071,14 @@
                     data: {
                         labels: nombres,
                         datasets: [
-                            { label: 'Requerimientos (R - Verde)', data: reqs, backgroundColor: '#059669', borderRadius: 4 },
-                            { label: 'Incidentes (I - Rojo)', data: incs, backgroundColor: '#dc2626', borderRadius: 4 }
+                            { label: 'Req (R)', data: reqs, backgroundColor: '#059669', borderRadius: 4 },
+                            { label: 'Inc (I)', data: incs, backgroundColor: '#dc2626', borderRadius: 4 }
                         ]
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } },
-                        scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } }, x: { grid: { display: false } } }
+                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 2, font: {size: 10} } }, x: { grid: { display: false }, ticks: {font: {size: 9}} } }
                     }
                 });
             }
@@ -1099,7 +1091,7 @@
                 chartDona = new Chart(ctxDona, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Requerimientos (R)', 'Incidentes (I)'],
+                        labels: ['Req (R)', 'Inc (I)'],
                         datasets: [{
                             data: [totalReq, totalInc],
                             backgroundColor: ['#059669', '#dc2626'],
@@ -1108,7 +1100,7 @@
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false, cutout: '65%',
-                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } }
+                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } }
                     }
                 });
             }
@@ -1119,17 +1111,16 @@
             if (!tb) return;
             let html = '';
             historialData.slice(0, 50).forEach(h => {
-                let adjunto = '<span class="text-slate-400 font-semibold">Sin foto</span>';
+                let adjunto = '<span class="text-slate-400 font-semibold text-xs">Sin foto</span>';
                 if (h.foto) {
                     adjunto = `<div class="flex flex-col items-center gap-1">
-                        <button onclick="abrirModalFoto('${h.foto}', '${escapeHtml(h.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-image text-xl"></i></button>
-                        <span class="text-[10px] text-slate-500 line-clamp-1 max-w-[150px] whitespace-pre-wrap">${escapeHtml(h.comentario || '')}</span>
+                        <button onclick="abrirModalFoto('${h.foto}', '${escapeHtml(h.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-image text-lg"></i></button>
                     </div>`;
                 }
                 html += `<tr>
-                    <td class="text-sm text-slate-600">${new Date(h.fecha).toLocaleString('es-PE')}</td>
-                    <td class="font-bold text-slate-800">${escapeHtml(h.nombre)}</td>
-                    <td class="font-mono font-bold text-red-600">${escapeHtml(h.ticket)}</td>
+                    <td class="text-[10px] md:text-sm text-slate-600">${new Date(h.fecha).toLocaleString('es-PE')}</td>
+                    <td class="font-bold text-slate-800 text-xs md:text-sm">${escapeHtml(h.nombre)}</td>
+                    <td class="font-mono font-bold text-red-600 text-xs md:text-sm">${escapeHtml(h.ticket)}</td>
                     <td style="text-align:center;">${adjunto}</td>
                 </tr>`;
             });
@@ -1146,7 +1137,7 @@
         }
 
         /* ============================================
-           USUARIOS (ADMIN)
+           USUARIOS
            ============================================ */
         function crearUsuario() {
             if (sesionActual.rol !== 'admin') return;
@@ -1187,7 +1178,7 @@
                 if (u.rol === 'operador') rolColor = 'bg-emerald-100 text-emerald-700';
 
                 const selectRol = `
-                    <select onchange="cambiarRolUsuario('${u.user}', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold ${rolColor}">
+                    <select onchange="cambiarRolUsuario('${u.user}', this.value)" class="border border-slate-300 rounded px-1 py-0.5 text-[10px] md:text-xs font-bold ${rolColor}">
                         <option value="analista" ${u.rol === 'analista' ? 'selected' : ''}>ANALISTA</option>
                         <option value="operador" ${u.rol === 'operador' ? 'selected' : ''}>OPERADOR</option>
                         <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>ADMIN</option>
@@ -1195,19 +1186,35 @@
                 `;
 
                 html += `<tr>
-                    <td class="font-mono font-bold">${escapeHtml(u.user)}</td>
-                    <td>${escapeHtml(u.nombre)}</td>
-                    <td>${u.user === 'admin' ? `<span class="px-2 py-1 rounded text-xs font-bold ${rolColor}">${u.rol.toUpperCase()}</span>` : selectRol}</td>
-                    <td class="font-mono text-slate-400 text-xs">${u.debeCambiar ? 'Cambio pendiente' : '••••••••'}</td>
-                    <td><button onclick="resetearPassword('${u.user}')" class="text-red-500 hover:text-red-700 text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
+                    <td class="font-mono font-bold text-xs md:text-sm">${escapeHtml(u.user)}</td>
+                    <td class="text-xs md:text-sm">${escapeHtml(u.nombre)}</td>
+                    <td>${u.user === 'admin' ? `<span class="px-1 py-0.5 rounded text-[10px] md:text-xs font-bold ${rolColor}">${u.rol.toUpperCase()}</span>` : selectRol}</td>
+                    <td class="font-mono text-slate-400 text-[10px] md:text-xs">${u.debeCambiar ? 'Cambio pendiente' : '••••••••'}</td>
+                    <td><button onclick="resetearPassword('${u.user}')" class="text-red-500 hover:text-red-700 text-xs md:text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
                 </tr>`;
             });
             tb.innerHTML = html;
         }
 
         /* ============================================
-           CHAT MULTIUSUARIO REDISEÑADO
+           CHAT CON EMOJIS Y MENCIONES
            ============================================ */
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emoji-picker');
+            picker.classList.toggle('show');
+            if (picker.innerHTML === '') {
+                const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
+                picker.innerHTML = emojis.map(e => `<div class="emoji-btn" onclick="insertEmoji('${e}')">${e}</div>`).join('');
+            }
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('chat-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emoji-picker').classList.remove('show');
+        }
+
         function toggleChatPanel() {
             chatAbierto = !chatAbierto;
             document.getElementById('chat-panel').classList.toggle('show', chatAbierto);
@@ -1230,7 +1237,6 @@
                 const color = colorAvatar(m.nombre);
                 let textoHtml = escapeHtml(m.mensaje);
                 
-                // Resaltar menciones
                 if (m.mensaje.includes('@')) textoHtml = textoHtml.replace(/@([A-Za-z0-9\s]+?)(?=\s|$|[.,!?])/g, '<span class="mention">@$1</span>');
                 
                 let imgHtml = m.foto ? `<img src="${m.foto}" class="mt-2 rounded-lg max-h-40 cursor-pointer border border-white/20 shadow-sm" onclick="abrirModalFoto('${m.foto}')">` : '';
@@ -1368,6 +1374,55 @@
                 tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
             });
         });
+
+        /* ============================================
+           PANTALLA COMPLETA Y RELOJ
+           ============================================ */
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    mostrarToast(`Error al activar pantalla completa: ${err.message}`, 'error');
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                document.getElementById('main-header').style.transform = 'translateY(-100%)';
+                document.getElementById('main-header').style.opacity = '0';
+                document.getElementById('main-header').style.position = 'absolute';
+            } else {
+                document.getElementById('main-header').style.transform = 'translateY(0)';
+                document.getElementById('main-header').style.opacity = '1';
+                document.getElementById('main-header').style.position = 'sticky';
+            }
+        });
+
+        function iniciarReloj() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const el = document.getElementById('live-clock');
+                if (el) el.textContent = new Date().toLocaleTimeString('es-PE');
+                actualizarTiemposVista();
+            }, 1000);
+        }
+
+        function switchView(v) {
+            if (!sesionActual) return;
+            if (sesionActual.rol === 'analista' && v !== 'ranking') { v = 'ranking'; }
+            
+            ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
+            document.getElementById(`view-${v}`).classList.remove('hidden');
+            
+            if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
+            else if (v === 'ranking') { renderRankingYModulos(); if (sesionActual.rol === 'analista') renderAnalistaDashboard(); }
+            else if (v === 'historial') renderHistorial();
+            else if (v === 'usuarios') renderTablaUsuarios();
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             verificarSesionAlCargar();
