@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OGTI v11.0 - Control de atenciones (Integral)</title>
+    <title>OGTI v14.0 - Control de atenciones (Vacaciones y Edición)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -53,6 +53,7 @@
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
         .dot-red { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; animation: pulse-red 1.5s infinite; }
         .dot-green { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; }
+        .dot-yellow { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #eab308; }
 
         /* Tablas Generales */
         table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -64,6 +65,7 @@
         .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .status-free { background-color: #dcfce7; color: #166534; }
         .status-busy { background-color: #fee2e2; color: #991b1b; }
+        .status-vacation { background-color: #fef08a; color: #854d0e; }
 
         /* Barras de progreso */
         .progress-wrapper { display: flex; align-items: center; gap: 12px; }
@@ -81,9 +83,12 @@
         .card-analyst { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; }
         .card-analyst.available { border-color: #bbf7d0; background: linear-gradient(to bottom, #ffffff, #f0fdf4); }
         .card-analyst.busy { border-color: #fecaca; background: linear-gradient(to bottom, #ffffff, #fef2f2); }
+        .card-analyst.vacation { border-color: #fef08a; background: linear-gradient(to bottom, #ffffff, #fefce8); }
+        
         .main-action { width: 100%; padding: 20px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; margin: 16px 0; }
         .card-analyst.available .main-action { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
         .card-analyst.busy .main-action { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+        .card-analyst.vacation .main-action { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
         /* Login y Modales */
         #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; }
@@ -121,6 +126,11 @@
         .mention-item:hover { background: #f1f5f9; color: #C5221F; }
         
         .hidden { display: none !important; }
+
+        /* Gráficas contenedores */
+        .chart-card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .chart-title { font-weight: 800; font-size: 1rem; color: #0f172a; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .chart-canvas-wrap { position: relative; height: 280px; }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col justify-between">
@@ -132,7 +142,7 @@
                 <div class="text-center mb-8">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="MIDIS" class="h-12 mx-auto mb-4" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'">
                     <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
-                    <p class="text-sm text-slate-500 mt-1">v11.0 - Gestión de Mesa de Ayuda</p>
+                    <p class="text-sm text-slate-500 mt-1">v14.0 - Gestión Integral</p>
                 </div>
                 <div class="space-y-4">
                     <div><label class="block text-sm font-bold text-slate-700 mb-2">Usuario</label><input type="text" id="login-user" placeholder="Ej. admin" class="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
@@ -140,7 +150,7 @@
                     <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
                     <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-2xl transition shadow-lg">Ingresar</button>
                     <div class="text-xs text-slate-500 text-center pt-3 border-t border-slate-100">
-                        
+                        <div>Admin inicial: <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin</span> / <span class="font-mono bg-red-50 px-2 py-0.5 rounded">admin123</span></div>
                     </div>
                 </div>
             </div>
@@ -182,7 +192,7 @@
         <div class="w-full px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-4">
                 <div class="bg-white p-2 rounded-2xl shadow-md"><img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png" alt="Logo" class="h-10" onerror="this.src='https://placehold.co/120x40/C5221F/ffffff?text=MIDIS'"></div>
-                <div><h1 class="text-lg md:text-2xl font-extrabold text-white">OGTI Control <span class="text-xs bg-black/20 px-3 py-1 rounded-full uppercase">v11.0</span></h1></div>
+                <div><h1 class="text-lg md:text-2xl font-extrabold text-white">OGTI Control <span class="text-xs bg-black/20 px-3 py-1 rounded-full uppercase">v14.0</span></h1></div>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <div id="user-info" class="hidden flex items-center gap-2 bg-black/20 border border-white/20 rounded-xl px-3 py-2">
@@ -214,7 +224,11 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-slate-600 mb-1">Estado</label>
-                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm" onchange="verificarEstadoLibre()"><option value="libre">🟢 Libre</option><option value="ocupado">🔴 Ocupado</option></select>
+                        <select id="op-estado" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm" onchange="verificarEstadoLibre()">
+                            <option value="libre">🟢 Libre</option>
+                            <option value="ocupado">🔴 Ocupado</option>
+                            <option value="vacaciones">🟡 Vacaciones</option>
+                        </select>
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-slate-600 mb-1">Ticket iTop</label>
@@ -222,10 +236,10 @@
                     </div>
                     <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-600 mb-1">Evidencia (Ctrl+V)</label>
-                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-1 bg-slate-50 text-center cursor-pointer hover:bg-slate-100 relative" onclick="document.getElementById('op-foto-file').click()">
-                            <span class="text-xs text-slate-500"><i class="fa-solid fa-camera"></i> Adjuntar o Pegar</span>
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 text-center cursor-pointer hover:bg-slate-100 relative flex items-center justify-center h-[42px] overflow-hidden" onclick="document.getElementById('op-foto-file').click()">
+                            <span id="preview-text" class="text-xs text-slate-500"><i class="fa-solid fa-camera"></i> Adjuntar o Pegar</span>
+                            <img id="foto-preview" class="hidden absolute inset-0 w-full h-full object-cover">
                             <input type="file" id="op-foto-file" accept="image/*" class="hidden">
-                            <img id="foto-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-lg opacity-80">
                         </div>
                         <input type="hidden" id="op-foto-base64">
                     </div>
@@ -233,12 +247,13 @@
                         <button onclick="guardarAtencion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-sm transition"><i class="fa-solid fa-save mr-1"></i> Guardar</button>
                     </div>
                     <div class="md:col-span-12" id="comentario-container" style="display:none;">
-                        <input type="text" id="op-comentario" placeholder="Comentario breve sobre la foto (opcional)..." class="w-full bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                        <label class="block text-xs font-bold text-emerald-700 mb-1">Comentario (Visible para el analista)</label>
+                        <textarea id="op-comentario" rows="2" placeholder="Escriba aquí los detalles de la atención..." class="w-full bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla Operador (Igual a Imagen 1) -->
+            <!-- Tabla Operador -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <table>
                     <thead>
@@ -258,32 +273,61 @@
 
         <!-- VIEW: RANKING Y MODULOS -->
         <div id="view-ranking" class="space-y-6 w-full hidden">
+            
+            <!-- TARJETA EXCLUSIVA PARA ANALISTAS -->
+            <div id="analista-dashboard" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl font-extrabold" id="ana-initial">A</div>
+                        <div>
+                            <h2 class="text-xl font-extrabold text-slate-800" id="ana-name">Nombre del Analista</h2>
+                            <p class="text-sm text-slate-500 font-semibold">Mi Panel de Atenciones</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 w-full md:w-auto">
+                        <div class="flex justify-between items-center gap-6 mb-2">
+                            <div>
+                                <div class="text-xs font-bold text-slate-500 uppercase">Ticket Asignado</div>
+                                <div class="text-2xl font-mono font-extrabold text-red-600" id="ana-ticket">LIBRE</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs font-bold text-slate-500 uppercase">Fecha/Hora Asignación</div>
+                                <div class="text-sm font-bold text-slate-800" id="ana-fecha">-</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-2 rounded border border-slate-200 mt-2" id="ana-comentario">
+                            Sin comentarios adicionales.
+                        </div>
+                        <button id="btn-finalizar-atencion" onclick="finalizarAtencionAnalista()" class="hidden w-full mt-3 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-sm transition">
+                            <i class="fa-solid fa-check-circle mr-1"></i> Finalizar Atención
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-slate-100 pt-4">
+                    <h3 class="font-bold text-slate-700 mb-4"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> Mis atenciones de la semana</h3>
+                    <div class="h-48 w-full max-w-sm mx-auto"><canvas id="chart-analista-semana"></canvas></div>
+                </div>
+            </div>
+
             <div class="flex justify-between items-center mb-2">
-                <h2 class="text-xl font-extrabold"><i class="fa-solid fa-display text-emerald-600 mr-2"></i> MÓDULOS Y RANKING</h2>
-                <div class="bg-slate-900 text-emerald-400 px-4 py-2 rounded-xl font-mono font-bold text-sm" id="live-clock">--:--:--</div>
+                <h2 class="text-xl font-extrabold"><i class="fa-solid fa-display text-emerald-600 mr-2"></i> MÓDULOS DEL EQUIPO</h2>
+                <!-- RELOJ MAS GRANDE PARA TV -->
+                <div class="bg-slate-900 text-emerald-400 px-8 py-3 rounded-2xl font-mono font-black text-3xl md:text-5xl tracking-widest border-4 border-slate-700 shadow-2xl" id="live-clock">--:--:--</div>
             </div>
             
-            <!-- Tarjetas (Igual a Imagen 2) -->
+            <!-- Tarjetas Módulos -->
             <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
 
-            <!-- Ranking (Igual a Imagen 3) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
-                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                    <h3 class="font-bold text-slate-800"><i class="fa-solid fa-ranking-star text-red-600 mr-2"></i> RANKING DE ATENCIONES</h3>
-                    <span class="text-xs font-bold text-slate-500 bg-white border px-3 py-1 rounded-full">Estadísticas en Vivo</span>
+            <!-- GRÁFICAS GLOBALES -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fa-solid fa-chart-simple text-red-600"></i> CARGA: REQ. (VERDE) VS INC. (ROJO)</div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-barras-global"></canvas></div>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 80px; text-align: center;"># RANKING</th>
-                            <th>ANALISTA SOPORTE</th>
-                            <th style="text-align: center; width: 150px;">REQUERIMIENTOS (R)</th>
-                            <th style="text-align: center; width: 150px;">INCIDENTES (I)</th>
-                            <th style="width: 40%;">PROGRESO TOTAL DE ATENCIONES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-ranking"></tbody>
-                </table>
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fa-solid fa-chart-pie text-red-600"></i> DISTRIBUCIÓN GLOBAL OGTI</div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-dona-global"></canvas></div>
+                </div>
             </div>
         </div>
 
@@ -294,10 +338,6 @@
                     <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-red-600"></i> Historial General de Atenciones</h2>
                     <div class="flex gap-2">
                         <input type="text" id="hist-search" placeholder="Buscar por ticket o nombre..." class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm w-64">
-                        <select id="hist-sort" class="bg-white border border-slate-300 rounded-xl px-4 py-2 text-sm font-semibold">
-                            <option value="desc">Ordenar por Fecha (Más reciente)</option>
-                            <option value="asc">Ordenar por Fecha (Más antiguo)</option>
-                        </select>
                         <button onclick="exportarHistorialCSV()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900"><i class="fa-solid fa-file-csv"></i></button>
                     </div>
                 </div>
@@ -317,7 +357,7 @@
             </div>
         </div>
 
-        <!-- VIEW: USUARIOS -->
+        <!-- VIEW: USUARIOS (CON EDICIÓN DE ROL) -->
         <div id="view-usuarios" class="space-y-6 w-full hidden">
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex justify-between items-center mb-6 pb-4 border-b">
@@ -326,11 +366,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div><label class="block text-xs font-bold text-slate-600 mb-1">Usuario</label><input type="text" id="new-user-name" placeholder="juan.perez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
                     <div><label class="block text-xs font-bold text-slate-600 mb-1">Nombre Real</label><input type="text" id="new-user-realname" placeholder="Juan Pérez" class="w-full border rounded-xl px-3 py-2 text-sm"></div>
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Rol</label><select id="new-user-role" class="w-full border rounded-xl px-3 py-2 text-sm"><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Rol Inicial</label>
+                        <select id="new-user-role" class="w-full border rounded-xl px-3 py-2 text-sm">
+                            <option value="analista">Analista</option>
+                            <option value="operador">Operador</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
                     <div class="flex items-end"><button onclick="crearUsuario()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Crear</button></div>
                 </div>
                 <div class="table-responsive border rounded-xl">
-                    <table><thead><tr><th>USUARIO</th><th>NOMBRE REAL</th><th>ROL</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody id="tabla-usuarios"></tbody></table>
+                    <table>
+                        <thead><tr><th>USUARIO</th><th>NOMBRE REAL</th><th>ROL (Editable)</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                        <tbody id="tabla-usuarios"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -375,6 +425,8 @@
         let tempFotoChat = null;
         let usuarioCambiandoPass = null;
         let timerInterval = null;
+        
+        let chartBarras = null, chartDona = null, chartAnalista = null;
 
         const AVATAR_COLORS = ['#C5221F','#059669','#2563eb','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
         function colorAvatar(nombre) { let h = 0; for (let i = 0; i < nombre.length; i++) h = nombre.charCodeAt(i) + ((h << 5) - h); return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]; }
@@ -383,6 +435,7 @@
         window.addEventListener('firebaseReady', () => {
             firebaseListo = true;
             iniciarEscuchasFirebase();
+            if ("Notification" in window && Notification.permission !== "granted") { Notification.requestPermission(); }
         });
 
         function mostrarToast(msg, tipo = 'success') {
@@ -405,10 +458,9 @@
         function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
 
         /* ============================================
-           FIREBASE (SINCRONIZACIÓN TOTAL)
+           FIREBASE
            ============================================ */
         function iniciarEscuchasFirebase() {
-            // 1. Usuarios
             const usersRef = window.firebaseRef(window.firebaseDB, 'usuarios');
             window.firebaseOnValue(usersRef, (snapshot) => {
                 const data = snapshot.val();
@@ -417,7 +469,6 @@
                 } else { usuariosData = data; renderTablaUsuarios(); }
             });
 
-            // 2. Analistas
             const analistasRef = window.firebaseRef(window.firebaseDB, 'analistas');
             window.firebaseOnValue(analistasRef, (snapshot) => {
                 const data = snapshot.val();
@@ -433,17 +484,16 @@
                 renderRankingYModulos();
             });
 
-            // 3. Historial
             const historialRef = window.firebaseRef(window.firebaseDB, 'historial');
             window.firebaseOnValue(historialRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     historialData = Object.values(data).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
                     if (!document.getElementById('view-historial').classList.contains('hidden')) renderHistorial();
+                    if (sesionActual?.rol === 'analista') renderAnalistaDashboard();
                 }
             });
 
-            // 4. Chat (Sincronización en tiempo real)
             const chatRef = window.firebaseQuery(window.firebaseRef(window.firebaseDB, 'chat'), window.firebaseLimitToLast(100));
             window.firebaseOnValue(chatRef, (snapshot) => {
                 const data = snapshot.val();
@@ -481,7 +531,7 @@
                 return;
             }
             sesionActual = { user, ...usuariosData[user] };
-            sessionStorage.setItem('ogti_session_v11', JSON.stringify(sesionActual));
+            sessionStorage.setItem('ogti_session_v14', JSON.stringify(sesionActual));
             iniciarSesionUI();
         }
 
@@ -497,13 +547,13 @@
             window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
                 usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
                 sesionActual = { user, ...usuariosData[user] };
-                sessionStorage.setItem('ogti_session_v11', JSON.stringify(sesionActual));
+                sessionStorage.setItem('ogti_session_v14', JSON.stringify(sesionActual));
                 iniciarSesionUI();
             });
         }
 
-        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v11'); location.reload(); }
-        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v11'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
+        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v14'); location.reload(); }
+        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v14'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
 
         function iniciarSesionUI() {
             if (!sesionActual) return;
@@ -516,14 +566,135 @@
             document.getElementById('user-name-display').textContent = sesionActual.nombre;
             document.getElementById('user-role-display').textContent = sesionActual.rol;
             
-            document.getElementById('btn-rank').classList.remove('hidden');
-            if (sesionActual.rol === 'admin') {
+            const rol = sesionActual.rol;
+            document.getElementById('btn-rank').classList.remove('hidden'); 
+            
+            if (rol === 'admin') {
                 document.getElementById('btn-op').classList.remove('hidden');
                 document.getElementById('btn-hist').classList.remove('hidden');
                 document.getElementById('btn-users').classList.remove('hidden');
+            } else if (rol === 'operador') {
+                document.getElementById('btn-op').classList.remove('hidden');
+                document.getElementById('btn-hist').classList.remove('hidden');
             }
+            
+            if (rol === 'analista') {
+                document.getElementById('analista-dashboard').classList.remove('hidden');
+                renderAnalistaDashboard();
+            } else {
+                document.getElementById('analista-dashboard').classList.add('hidden');
+            }
+            
             switchView('ranking');
             iniciarReloj();
+        }
+
+        // Panel del analista (Tarjeta, Fecha, Ticket, Comentario y Botón Finalizar)
+        function renderAnalistaDashboard() {
+            if (sesionActual?.rol !== 'analista') return;
+            const nombre = sesionActual.nombre;
+            const a = analistasData.find(x => x.nombre === nombre);
+            
+            document.getElementById('ana-name').textContent = nombre;
+            document.getElementById('ana-initial').textContent = nombre.charAt(0).toUpperCase();
+            
+            const btnFinalizar = document.getElementById('btn-finalizar-atencion');
+            const txtComentario = document.getElementById('ana-comentario');
+            const txtFecha = document.getElementById('ana-fecha');
+            const txtTicket = document.getElementById('ana-ticket');
+
+            if (a) {
+                if (a.estado === 'ocupado') {
+                    txtTicket.textContent = a.ticket;
+                    txtTicket.className = 'text-2xl font-mono font-extrabold text-red-600';
+                    
+                    // Mostrar fecha formateada
+                    if (a.startTime) {
+                        txtFecha.textContent = new Date(a.startTime).toLocaleString('es-PE');
+                    } else {
+                        txtFecha.textContent = '-';
+                    }
+                    
+                    // Mostrar comentario de la operadora
+                    txtComentario.textContent = a.comentario || 'Sin comentarios adicionales.';
+                    txtComentario.classList.remove('hidden');
+                    
+                    // Mostrar botón de finalizar
+                    btnFinalizar.classList.remove('hidden');
+                } else {
+                    txtTicket.textContent = a.estado === 'vacaciones' ? 'VACACIONES' : 'LIBRE';
+                    txtTicket.className = 'text-2xl font-mono font-extrabold text-emerald-600';
+                    txtFecha.textContent = '-';
+                    txtComentario.textContent = 'No tienes ninguna atención asignada en este momento.';
+                    btnFinalizar.classList.add('hidden');
+                }
+            }
+
+            // Gráfica semanal
+            const ctx = document.getElementById('chart-analista-semana');
+            if (!ctx) return;
+            
+            let reqs = 0, incs = 0;
+            const hace7dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            
+            historialData.forEach(h => {
+                if (h.nombre === nombre && h.evento === 'apertura' && new Date(h.fecha).getTime() >= hace7dias) {
+                    if (h.ticket.startsWith('I-')) incs++;
+                    else reqs++;
+                }
+            });
+
+            if (chartAnalista) chartAnalista.destroy();
+            chartAnalista = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Requerimientos (R)', 'Incidentes (I)'],
+                    datasets: [{
+                        data: [reqs, incs],
+                        backgroundColor: ['#059669', '#C5221F'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // Botón para liberar al analista desde su propio panel
+        async function finalizarAtencionAnalista() {
+            if (sesionActual?.rol !== 'analista') return;
+            const nombre = sesionActual.nombre;
+            const a = analistasData.find(x => x.nombre === nombre);
+            if (!a || a.estado !== 'ocupado') return;
+
+            if (!confirm("¿Estás seguro de finalizar y liberar esta atención?")) return;
+
+            const ticketAnterior = a.ticket;
+            a.estado = 'libre';
+            a.ticket = '-';
+            a.foto = null;
+            a.comentario = null;
+            a.startTime = null;
+
+            // Guardar en Firebase
+            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
+
+            // Registrar en historial
+            const nuevoHistorial = {
+                fecha: new Date().toISOString(),
+                nombre: nombre,
+                ticket: ticketAnterior,
+                evento: 'cierre',
+                comentario: 'Finalizado por el analista',
+                foto: null
+            };
+            historialData.unshift(nuevoHistorial);
+            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
+
+            mostrarToast('Atención finalizada correctamente.', 'success');
+            renderAnalistaDashboard();
         }
 
         function iniciarReloj() {
@@ -537,18 +708,19 @@
 
         function switchView(v) {
             if (!sesionActual) return;
-            if (sesionActual.rol === 'viewer' && v !== 'ranking') { v = 'ranking'; }
+            if (sesionActual.rol === 'analista' && v !== 'ranking') { v = 'ranking'; }
+            
             ['operador','ranking','historial','usuarios'].forEach(x => { const el = document.getElementById(`view-${x}`); if (el) el.classList.add('hidden'); });
             document.getElementById(`view-${v}`).classList.remove('hidden');
             
             if (v === 'operador') { poblarSelectAnalistas(); renderTablaAnalistasGeneral(); }
-            else if (v === 'ranking') renderRankingYModulos();
+            else if (v === 'ranking') { renderRankingYModulos(); if (sesionActual.rol === 'analista') renderAnalistaDashboard(); }
             else if (v === 'historial') renderHistorial();
             else if (v === 'usuarios') renderTablaUsuarios();
         }
 
         /* ============================================
-           OPERADOR
+           OPERADOR Y EVIDENCIA
            ============================================ */
         function poblarSelectAnalistas() {
             const s = document.getElementById('op-nombre');
@@ -565,24 +737,42 @@
                 document.getElementById('op-comentario').value = a.comentario || '';
                 
                 const prev = document.getElementById('foto-preview');
+                const text = document.getElementById('preview-text');
                 const cont = document.getElementById('comentario-container');
                 const b64 = document.getElementById('op-foto-base64');
-                if (a.foto) { prev.src = a.foto; prev.classList.remove('hidden'); cont.style.display = 'block'; b64.value = a.foto; }
-                else { prev.classList.add('hidden'); cont.style.display = 'none'; b64.value = ''; }
+                if (a.foto) { 
+                    prev.src = a.foto; prev.classList.remove('hidden'); text.classList.add('hidden');
+                    cont.style.display = 'block'; b64.value = a.foto; 
+                } else { 
+                    prev.classList.add('hidden'); text.classList.remove('hidden');
+                    cont.style.display = 'none'; b64.value = ''; 
+                }
             }
             verificarEstadoLibre();
         }
 
         function verificarEstadoLibre() {
+            const nombre = document.getElementById('op-nombre').value;
+            const a = analistasData.find(x => x.nombre === nombre);
             const e = document.getElementById('op-estado').value;
-            document.getElementById('op-ticket').disabled = (e === 'libre');
-            if (e === 'libre') document.getElementById('op-ticket').value = '-';
+            
+            if (a && a.estado === 'ocupado') {
+                document.getElementById('op-estado').value = 'ocupado';
+                document.getElementById('op-ticket').disabled = false;
+            } else if (a && a.estado === 'vacaciones') {
+                document.getElementById('op-estado').value = 'vacaciones';
+                document.getElementById('op-ticket').disabled = true;
+            } else {
+                document.getElementById('op-ticket').disabled = (e === 'libre' || e === 'vacaciones');
+                if (e === 'libre' || e === 'vacaciones') document.getElementById('op-ticket').value = '-';
+            }
         }
 
         function mostrarComentarioFoto(b64) {
             document.getElementById('op-foto-base64').value = b64;
             const prev = document.getElementById('foto-preview');
-            prev.src = b64; prev.classList.remove('hidden');
+            const text = document.getElementById('preview-text');
+            prev.src = b64; prev.classList.remove('hidden'); text.classList.add('hidden');
             document.getElementById('comentario-container').style.display = 'block';
         }
 
@@ -630,7 +820,7 @@
         });
 
         async function guardarAtencion() {
-            if (sesionActual.rol !== 'admin') return;
+            if (sesionActual.rol === 'analista') return;
             const nombreSel = document.getElementById('op-nombre').value;
             const estadoSel = document.getElementById('op-estado').value;
             let ticketSel = document.getElementById('op-ticket').value.trim().toUpperCase() || '-';
@@ -642,11 +832,17 @@
             const a = analistasData.find(x => x.nombre === nombreSel);
             if (!a) return;
 
+            // Lógica de tiempo
+            if (estadoSel === 'ocupado' && (a.ticket !== ticketSel || !a.startTime)) {
+                a.startTime = Date.now();
+            } else if (estadoSel === 'libre' || estadoSel === 'vacaciones') {
+                a.startTime = null;
+            }
+
             a.estado = estadoSel;
             a.ticket = ticketSel;
             a.foto = estadoSel === 'ocupado' ? fotoSel : null;
             a.comentario = estadoSel === 'ocupado' ? comentarioSel : null;
-            a.startTime = estadoSel === 'ocupado' ? (a.startTime || Date.now()) : null;
             
             if (estadoSel === 'ocupado' && ticketSel.startsWith('I-')) a.totalI = (a.totalI||0) + 1;
             if (estadoSel === 'ocupado' && ticketSel.startsWith('R-')) a.totalR = (a.totalR||0) + 1;
@@ -664,9 +860,10 @@
             historialData.unshift(nuevoHistorial);
             await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
             
-            mostrarToast(`Atención asignada a ${nombreSel} (${ticketSel})`, 'success');
             reproducirAlertaTicket(`${ticketSel} para ${nombreSel}`);
+            enviarNotificacionPush("Nueva Atención OGTI", `Ticket ${ticketSel} asignado a ${nombreSel}`);
             
+            mostrarToast(`Atención asignada a ${nombreSel} (${ticketSel})`, 'success');
             limpiarFormularioTicket();
         }
 
@@ -674,13 +871,22 @@
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
-                m.lang='es-PE'; m.rate=1.05;
+                m.lang='es-PE'; m.rate=1.05; m.volume=1;
                 setTimeout(() => window.speechSynthesis.speak(m), 300);
             }
         }
 
+        function enviarNotificacionPush(titulo, cuerpo) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titulo, {
+                    body: cuerpo,
+                    icon: "https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png"
+                });
+            }
+        }
+
         /* ============================================
-           RENDERS
+           RENDERS Y GRÁFICAS
            ============================================ */
         function calcularTiempo(startTime) {
             if (!startTime) return { text: '-', critical: false };
@@ -724,19 +930,29 @@
                 const pct = Math.round((total / maxTotal) * 100);
                 let fotoHtml = '<span class="text-slate-400">-</span>';
                 if (a.foto) {
-                    fotoHtml = `<button onclick="abrirModalFoto('${a.foto}', 'Comentario: ${escapeHtml(a.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700 text-lg"><i class="fa-solid fa-image"></i></button>`;
+                    fotoHtml = `<button onclick="abrirModalFoto('${a.foto}', '${escapeHtml(a.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700 text-lg"><i class="fa-solid fa-image"></i></button>`;
                 }
                 let timeHtml = '<span class="text-slate-400">-</span>';
                 if (a.estado === 'ocupado' && a.startTime) {
                     timeHtml = `<span class="time-live-table" data-start="${a.startTime}">...</span>`;
                 }
 
+                let statusPill = '';
+                let statusDot = '';
+                if (a.estado === 'ocupado') {
+                    statusPill = 'OCUPADO (Atendiendo)'; statusDot = 'dot-red';
+                } else if (a.estado === 'vacaciones') {
+                    statusPill = 'VACACIONES'; statusDot = 'dot-yellow';
+                } else {
+                    statusPill = 'LIBRE (Disponible)'; statusDot = 'dot-green';
+                }
+
                 html += `<tr>
                     <td class="font-bold text-slate-800">${escapeHtml(a.nombre)}</td>
                     <td>
-                        <span class="status-pill ${a.estado === 'ocupado' ? 'status-busy' : 'status-free'}">
-                            <span class="${a.estado === 'ocupado' ? 'dot-red' : 'dot-green'}"></span>
-                            ${a.estado === 'ocupado' ? 'OCUPADO (Atendiendo)' : 'LIBRE (Disponible)'}
+                        <span class="status-pill status-${a.estado}">
+                            <span class="${statusDot}"></span>
+                            ${statusPill}
                         </span>
                     </td>
                     <td class="font-mono text-slate-700">${escapeHtml(a.ticket)}</td>
@@ -761,24 +977,36 @@
             
             analistasData.forEach(a => {
                 const busy = a.estado === 'ocupado';
+                const vac = a.estado === 'vacaciones';
                 let tooltip = '';
                 if (busy && a.foto) {
-                    tooltip = `<div class="tooltip-content"><img src="${a.foto}"><div class="text-xs text-center mt-1 font-bold text-slate-700">${escapeHtml(a.comentario || 'Ver foto')}</div></div>`;
+                    tooltip = `<div class="tooltip-content"><img src="${a.foto}"><div class="text-xs text-center mt-1 font-bold text-slate-700 truncate w-[180px]">${escapeHtml(a.comentario || 'Ver foto')}</div></div>`;
                 }
-                const clickAttr = (busy && a.foto) ? `onclick="abrirModalFoto('${a.foto}', 'Comentario: ${escapeHtml(a.comentario || 'Sin comentario')}')"` : '';
+                const clickAttr = (busy && a.foto) ? `onclick="abrirModalFoto('${a.foto}', '${escapeHtml(a.comentario || 'Sin comentario')}')"` : '';
                 
                 let timeHtml = '<span class="text-sm font-semibold text-slate-500">-</span>';
                 if (busy && a.startTime) {
                     timeHtml = `<span class="time-live" data-start="${a.startTime}">...</span>`;
                 }
 
-                html += `<div class="card-analyst ${busy ? 'busy' : 'available'} ${busy && a.foto ? 'tooltip-img' : ''}" ${clickAttr}>
+                let cardClass = 'available';
+                let statusLabel = '<span class="dot-green mr-1"></span> LIBRE';
+                let actionLabel = 'DISPONIBLE';
+                let textClass = 'text-emerald-600';
+
+                if (busy) {
+                    cardClass = 'busy'; statusLabel = '<span class="dot-red mr-1"></span> ATENDIENDO'; actionLabel = escapeHtml(a.ticket); textClass = 'text-red-600';
+                } else if (vac) {
+                    cardClass = 'vacation'; statusLabel = '<span class="dot-yellow mr-1"></span> VACACIONES'; actionLabel = 'VACACIONES'; textClass = 'text-yellow-600';
+                }
+
+                html += `<div class="card-analyst ${cardClass} ${busy && a.foto ? 'tooltip-img' : ''}" ${clickAttr}>
                     ${tooltip}
-                    <div class="text-xs font-extrabold uppercase tracking-wider mb-2 ${busy ? 'text-red-600' : 'text-emerald-600'}">
-                        ${busy ? '<span class="dot-red mr-1"></span> ATENDIENDO' : '<span class="dot-green mr-1"></span> LIBRE'}
+                    <div class="text-xs font-extrabold uppercase tracking-wider mb-2 ${textClass}">
+                        ${statusLabel}
                     </div>
                     <h3 class="text-lg font-extrabold text-slate-900 mb-3">${escapeHtml(a.nombre)}</h3>
-                    <div class="main-action font-mono">${busy ? escapeHtml(a.ticket) : 'DISPONIBLE'}</div>
+                    <div class="main-action font-mono ${vac ? 'text-lg' : ''}">${actionLabel}</div>
                     <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-200/50">
                         <span class="text-xs font-bold text-slate-500">Tiempo de atención:</span>
                         ${timeHtml}
@@ -786,34 +1014,57 @@
                 </div>`;
             });
             g.innerHTML = html;
-
-            const tb = document.getElementById('tabla-ranking');
-            const ord = [...analistasData].sort((a,b) => (b.totalR+b.totalI)-(a.totalR+a.totalI));
-            const maxT = Math.max(...ord.map(a => (a.totalR||0)+(a.totalI||0)), 1);
-            let rows = '';
-            ord.forEach((a,i) => {
-                const total = (a.totalR||0)+(a.totalI||0);
-                const pct = Math.round((total/maxT)*100);
-                let medal = `<span class="text-slate-500 font-bold">#${i+1}</span>`;
-                if (i===0) medal = '<span class="text-2xl">🥇</span>';
-                if (i===1) medal = '<span class="text-2xl">🥈</span>';
-                if (i===2) medal = '<span class="text-2xl">🥉</span>';
-
-                rows += `<tr>
-                    <td style="text-align:center;">${medal}</td>
-                    <td class="font-bold text-slate-800">${escapeHtml(a.nombre)}</td>
-                    <td style="text-align:center;" class="text-emerald-600 font-extrabold text-lg">${a.totalR||0}</td>
-                    <td style="text-align:center;" class="text-red-600 font-extrabold text-lg">${a.totalI||0}</td>
-                    <td>
-                        <div class="progress-wrapper">
-                            <div class="progress-text">${total}<br><span class="progress-pct">(${pct}%)</span></div>
-                            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
-                        </div>
-                    </td>
-                </tr>`;
-            });
-            if (tb) tb.innerHTML = rows;
             actualizarTiemposVista();
+            
+            renderGraficasGlobales();
+        }
+
+        function renderGraficasGlobales() {
+            const nombres = analistasData.map(a => a.nombre);
+            const reqs = analistasData.map(a => a.totalR || 0);
+            const incs = analistasData.map(a => a.totalI || 0);
+
+            const ctxBarras = document.getElementById('chart-barras-global');
+            if (ctxBarras) {
+                if (chartBarras) chartBarras.destroy();
+                chartBarras = new Chart(ctxBarras, {
+                    type: 'bar',
+                    data: {
+                        labels: nombres,
+                        datasets: [
+                            { label: 'Requerimientos (R - Verde)', data: reqs, backgroundColor: '#059669', borderRadius: 4 },
+                            { label: 'Incidentes (I - Rojo)', data: incs, backgroundColor: '#dc2626', borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+
+            const totalReq = reqs.reduce((a, b) => a + b, 0);
+            const totalInc = incs.reduce((a, b) => a + b, 0);
+            const ctxDona = document.getElementById('chart-dona-global');
+            if (ctxDona) {
+                if (chartDona) chartDona.destroy();
+                chartDona = new Chart(ctxDona, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Requerimientos (R)', 'Incidentes (I)'],
+                        datasets: [{
+                            data: [totalReq, totalInc],
+                            backgroundColor: ['#059669', '#dc2626'],
+                            borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '65%',
+                        plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } }
+                    }
+                });
+            }
         }
 
         function renderHistorial() {
@@ -824,8 +1075,8 @@
                 let adjunto = '<span class="text-slate-400 font-semibold">Sin foto</span>';
                 if (h.foto) {
                     adjunto = `<div class="flex flex-col items-center gap-1">
-                        <button onclick="abrirModalFoto('${h.foto}', 'Comentario: ${escapeHtml(h.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-image text-xl"></i></button>
-                        <span class="text-xs text-slate-500 truncate max-w-[150px]">${escapeHtml(h.comentario || '')}</span>
+                        <button onclick="abrirModalFoto('${h.foto}', '${escapeHtml(h.comentario || 'Sin comentario')}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-image text-xl"></i></button>
+                        <span class="text-[10px] text-slate-500 line-clamp-1 max-w-[150px] whitespace-pre-wrap">${escapeHtml(h.comentario || '')}</span>
                     </div>`;
                 }
                 html += `<tr>
@@ -839,6 +1090,7 @@
         }
         
         function limpiarRegistros() {
+            if (sesionActual.rol === 'analista') return;
             if (!confirm("¿Reiniciar TODOS los tickets e historial?")) return;
             analistasData.forEach(a => { a.estado='libre'; a.ticket='-'; a.foto=null; a.comentario=null; a.startTime=null; a.totalR=0; a.totalI=0; });
             window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
@@ -847,9 +1099,10 @@
         }
 
         /* ============================================
-           USUARIOS
+           USUARIOS (ADMIN)
            ============================================ */
         function crearUsuario() {
+            if (sesionActual.rol !== 'admin') return;
             const user = document.getElementById('new-user-name').value.trim().toLowerCase();
             const nombre = document.getElementById('new-user-realname').value.trim();
             const rol = document.getElementById('new-user-role').value;
@@ -857,13 +1110,22 @@
             if (usuariosData[user]) { alert('El usuario ya existe.'); return; }
 
             window.firebaseSet(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { user, nombre, rol, pass: '123456', debeCambiar: true }).then(() => {
-                mostrarToast(`Usuario ${user} creado. Pass temporal: 123456`, 'success');
+                mostrarToast(`Usuario ${user} creado. Pass: 123456`, 'success');
                 document.getElementById('new-user-name').value = '';
                 document.getElementById('new-user-realname').value = '';
             });
         }
 
+        function cambiarRolUsuario(user, nuevoRol) {
+            if (sesionActual.rol !== 'admin') return;
+            if (user === 'admin') { mostrarToast('No puedes cambiar el rol del admin principal.', 'error'); return; }
+            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { rol: nuevoRol }).then(() => {
+                mostrarToast(`Rol de ${user} actualizado a ${nuevoRol}.`, 'success');
+            });
+        }
+
         function resetearPassword(user) {
+            if (sesionActual.rol !== 'admin') return;
             if (!confirm(`¿Resetear contraseña de ${user} a "123456"?`)) return;
             window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: '123456', debeCambiar: true }).then(() => mostrarToast('Contraseña reseteada.', 'info'));
         }
@@ -873,10 +1135,23 @@
             if (!tb) return;
             let html = '';
             Object.values(usuariosData).forEach(u => {
+                let rolColor = 'bg-blue-100 text-blue-700';
+                if (u.rol === 'admin') rolColor = 'bg-red-100 text-red-700';
+                if (u.rol === 'operador') rolColor = 'bg-emerald-100 text-emerald-700';
+
+                // Selector de rol en línea
+                const selectRol = `
+                    <select onchange="cambiarRolUsuario('${u.user}', this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs font-bold ${rolColor}">
+                        <option value="analista" ${u.rol === 'analista' ? 'selected' : ''}>ANALISTA</option>
+                        <option value="operador" ${u.rol === 'operador' ? 'selected' : ''}>OPERADOR</option>
+                        <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>ADMIN</option>
+                    </select>
+                `;
+
                 html += `<tr>
                     <td class="font-mono font-bold">${escapeHtml(u.user)}</td>
                     <td>${escapeHtml(u.nombre)}</td>
-                    <td><span class="px-2 py-1 rounded text-xs font-bold ${u.rol==='admin'?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}">${u.rol.toUpperCase()}</span></td>
+                    <td>${u.user === 'admin' ? `<span class="px-2 py-1 rounded text-xs font-bold ${rolColor}">${u.rol.toUpperCase()}</span>` : selectRol}</td>
                     <td class="font-mono text-slate-400 text-xs">${u.debeCambiar ? 'Cambio pendiente' : '••••••••'}</td>
                     <td><button onclick="resetearPassword('${u.user}')" class="text-red-500 hover:text-red-700 text-sm font-bold"><i class="fa-solid fa-rotate-left"></i> Reset</button></td>
                 </tr>`;
@@ -885,7 +1160,7 @@
         }
 
         /* ============================================
-           CHAT MULTIUSUARIO COMPLETO
+           CHAT MULTIUSUARIO
            ============================================ */
         function toggleChatPanel() {
             chatAbierto = !chatAbierto;
