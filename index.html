@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OGTI v19.1 - Control de atenciones</title>
+    <title>MIDIS OGTI 2026 - Sistema de Colas Mesa de Ayuda</title>
+    
+    <!-- FAVICON PERSONALIZADO -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23C5221F'/%3E%3Ctext x='50' y='68' font-size='48' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EOG%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23C5221F'/%3E%3Ctext x='50' y='68' font-size='48' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EOG%3C/text%3E%3C/svg%3E">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <!-- CONFIGURACIÓN FIREBASE -->
@@ -42,7 +47,20 @@
     </script>
 
     <script>
-        tailwind.config = { theme: { extend: { colors: { midisRedPrimary: '#C5221F', midisGreenAccent: '#059669' } } } }
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        midisRedPrimary: '#C5221F', 
+                        midisGreenAccent: '#059669',
+                        midisDark: '#0f172a'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                } 
+            } 
+        }
     </script>
     <style>
         * { font-family: 'Inter', sans-serif; }
@@ -89,9 +107,68 @@
         .card-analyst.busy .main-action { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
         .card-analyst.vacation .main-action { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-        #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; padding: 16px; }
-        #login-card { background: white; border-radius: 24px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        @media (min-width: 768px) { #login-card { padding: 40px; } }
+        /* ===== LOGIN PROFESIONAL v21.0 ===== */
+        #login-screen { 
+            position: fixed; inset: 0; z-index: 999; 
+            background: linear-gradient(135deg, #0f172a 0%, #7f1d1d 50%, #991b1b 100%); 
+            display: flex; align-items: center; justify-content: center; padding: 16px;
+        }
+        #login-card { 
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(20px);
+            border-radius: 28px; 
+            padding: 36px 28px; 
+            max-width: 480px; 
+            width: 100%; 
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        @media (min-width: 768px) { #login-card { padding: 48px 40px; } }
+        
+        .login-logo {
+            width: 80px; height: 80px; margin: 0 auto 16px;
+            background: white; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(197,34,31,0.25);
+            border: 2px solid #fecaca;
+            padding: 8px;
+        }
+        .login-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .login-title {
+            font-size: 1.5rem; font-weight: 900; color: #0f172a;
+            text-align: center; line-height: 1.2; letter-spacing: -0.02em;
+        }
+        .login-subtitle {
+            font-size: 0.75rem; font-weight: 700; color: #C5221F;
+            text-align: center; text-transform: uppercase; letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+        .login-desc {
+            font-size: 0.75rem; color: #64748b; text-align: center;
+            margin-top: 12px; line-height: 1.5; padding: 0 8px;
+        }
+
+        #login-form-area .form-label { display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        #login-form-area input[type="text"], #login-form-area input[type="password"] { 
+            width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px; 
+            padding: 14px 16px; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;
+        }
+        #login-form-area input[type="text"]:focus, #login-form-area input[type="password"]:focus { 
+            outline: none; border-color: #C5221F; background: white;
+            box-shadow: 0 0 0 4px rgba(197,34,31,0.1);
+        }
+        #login-form-area .btn-login {
+            width: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); 
+            color: white; font-weight: 800; padding: 16px; border-radius: 14px; 
+            font-size: 1rem; transition: all 0.2s; border: none; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(220,38,38,0.35);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        #login-form-area .btn-login:hover { 
+            transform: translateY(-1px); box-shadow: 0 12px 24px rgba(220,38,38,0.45);
+            background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+        }
         
         .tooltip-img { position: relative; cursor: pointer; }
         .tooltip-img .tooltip-content { visibility: hidden; position: absolute; z-index: 100; bottom: 120%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 12px; border: 3px solid white; background: white; padding: 4px; }
@@ -164,7 +241,7 @@
         #central-alert.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
         #central-alert i { font-size: 3rem; color: #C5221F; margin-bottom: 15px; animation: pulse-red 1s infinite; }
 
-        /* ===== CHAT PRIVADO - v19.1 ===== */
+        /* ===== CHAT PRIVADO ===== */
         .chat-tabs { display: flex; background: #e2e8f0; padding: 4px; gap: 4px; border-bottom: 1px solid #cbd5e1; }
         .chat-tab { flex: 1; padding: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
         .chat-tab.active { background: white; color: #C5221F; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -185,37 +262,374 @@
 
         #chat-back-btn { display: none; }
         #chat-back-btn.show { display: flex; }
+
+        /* ===== RELOJ FLOTANTE v21.0 ===== */
+        #floating-clock {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 300;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #34d399;
+            padding: 12px 20px;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 0 3px rgba(52,211,153,0.3);
+            border: 2px solid #10b981;
+            cursor: move;
+            user-select: none;
+            transition: box-shadow 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        #floating-clock:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 0 4px rgba(52,211,153,0.5);
+            transform: scale(1.02);
+        }
+        #floating-clock.dragging {
+            cursor: grabbing;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 5px rgba(52,211,153,0.6);
+        }
+        #floating-clock .clock-icon {
+            font-size: 1.2rem;
+            color: #10b981;
+            animation: pulse-clock 2s infinite;
+        }
+        @keyframes pulse-clock {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        #floating-clock .clock-time {
+            font-variant-numeric: tabular-nums;
+        }
+        #floating-clock .clock-date {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+        #floating-clock .clock-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 8px;
+        }
+        #floating-clock .clock-controls button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #94a3b8;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        #floating-clock .clock-controls button:hover {
+            background: rgba(52,211,153,0.3);
+            color: #34d399;
+            border-color: #10b981;
+        }
+        @media (max-width: 767px) {
+            #floating-clock {
+                top: 80px;
+                right: 10px;
+                padding: 8px 14px;
+                font-size: 1.1rem;
+                border-radius: 12px;
+            }
+            #floating-clock .clock-date { font-size: 0.55rem; }
+        }
+
+        /* ===== CAPTCHA ===== */
+        .captcha-container {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 14px;
+            padding: 14px;
+            border: 2px dashed #cbd5e1;
+            user-select: none;
+        }
+        .captcha-canvas {
+            display: block;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            max-width: 100%;
+        }
+        .captcha-input-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .captcha-input {
+            flex: 1;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .captcha-input:focus { border-color: #C5221F; }
+        .captcha-refresh {
+            background: #C5221F;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .captcha-refresh:hover { background: #991b1b; transform: rotate(180deg); }
+        .captcha-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ===== SEGURIDAD ===== */
+        .security-indicator {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            z-index: 350;
+            background: rgba(15,23,42,0.95);
+            color: #34d399;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid rgba(52,211,153,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .security-indicator.warning { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+        .security-indicator.danger { color: #f87171; border-color: rgba(248,113,113,0.3); }
+        @media (max-width: 767px) {
+            .security-indicator { bottom: 80px; left: 8px; font-size: 0.55rem; padding: 4px 8px; }
+        }
+
+        /* ===== BOTÓN ACTIVAR AUDIO FLOTANTE ===== */
+        #audio-fab {
+            position: fixed;
+            bottom: 16px;
+            right: 84px;
+            z-index: 400;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f59e0b;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 10px 25px rgba(245,158,11,0.5);
+            transition: transform 0.2s;
+            animation: pulse-audio 2s infinite;
+        }
+        @media (min-width: 768px) { #audio-fab { bottom: 24px; right: 96px; width: 52px; height: 52px; } }
+        #audio-fab:hover { transform: scale(1.1); }
+        #audio-fab.activated { background: #059669; animation: none; }
+        @keyframes pulse-audio {
+            0%, 100% { box-shadow: 0 10px 25px rgba(245,158,11,0.5); }
+            50% { box-shadow: 0 10px 35px rgba(245,158,11,0.8), 0 0 0 8px rgba(245,158,11,0.2); }
+        }
+
+        /* ===== ALERTA FLOTANTE MODULOS ===== */
+        #module-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+            border-radius: 24px;
+            padding: 32px 40px;
+            z-index: 2100;
+            box-shadow: 0 30px 60px rgba(220,38,38,0.6), 0 0 0 4px rgba(255,255,255,0.3);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 90%;
+            max-width: 450px;
+            border: 4px solid white;
+        }
+        #module-alert.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #module-alert .alert-icon {
+            font-size: 4rem;
+            margin-bottom: 12px;
+            animation: bell-shake 0.5s infinite;
+        }
+        @keyframes bell-shake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        #module-alert .alert-ticket {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 12px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        #module-alert .alert-name {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* ===== MEJORAS DE ACCESIBILIDAD ===== */
+        .focus-ring:focus { outline: 3px solid #fbbf24; outline-offset: 2px; }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 2px solid #fbbf24;
+            outline-offset: 2px;
+        }
+
+        /* ===== INDICADOR DE CONEXIÓN ===== */
+        .connection-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse-green 2s infinite;
+        }
+        .connection-dot.offline { background: #ef4444; animation: pulse-red 1s infinite; }
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ===== MODAL DE CONFIRMACIÓN ===== */
+        #confirm-modal {
+            position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.7);
+            display: none; align-items: center; justify-content: center;
+            padding: 16px; backdrop-filter: blur(4px);
+        }
+        #confirm-modal.show { display: flex; }
+        #confirm-modal .confirm-card {
+            background: white; border-radius: 20px; padding: 28px;
+            max-width: 400px; width: 100%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+        @keyframes modal-in { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #confirm-modal .confirm-icon { font-size: 3rem; color: #f59e0b; margin-bottom: 16px; }
+        #confirm-modal .confirm-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        #confirm-modal .confirm-text { font-size: 0.9rem; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+        #confirm-modal .confirm-buttons { display: flex; gap: 12px; }
+        #confirm-modal .confirm-buttons button {
+            flex: 1; padding: 12px; border-radius: 12px; font-weight: 700;
+            font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.2s;
+        }
+        #confirm-modal .btn-cancel { background: #f1f5f9; color: #64748b; }
+        #confirm-modal .btn-cancel:hover { background: #e2e8f0; }
+        #confirm-modal .btn-confirm { background: #dc2626; color: white; }
+        #confirm-modal .btn-confirm:hover { background: #b91c1c; }
+
+        .lockout-message {
+            background: #fef2f2; border: 2px solid #fecaca; color: #991b1b;
+            padding: 12px; border-radius: 12px; font-size: 0.8rem;
+            font-weight: 700; text-align: center;
+        }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col justify-between">
 
-    <!-- LOGIN -->
+    <!-- LOGIN v21.0 (DISEÑO PROFESIONAL) -->
     <div id="login-screen">
         <div id="login-card">
             <div id="login-form-area">
-                <div class="text-center mb-6">
-                    <img src="logo.png" alt="MIDIS" class="h-14 mx-auto mb-4" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
-                    <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
-                    <p class="text-sm text-slate-500 mt-1">v19.1 - Gestión Integral</p>
+                <!-- Logo -->
+                <div class="login-logo">
+                    <img src="logo.png" alt="MIDIS" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
                 </div>
-                <div class="space-y-4">
+                
+                <!-- Título Institucional -->
+                <div class="login-title">MIDIS OGTI 2026</div>
+                <div class="login-subtitle">Sistema de Colas Mesa de Ayuda</div>
+                <p class="login-desc">
+                    Control de Atenciones de la Oficina General de Tecnologías de la Información.
+                </p>
+                
+                <div class="space-y-4 mt-6">
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Usuario</label>
-                        <input type="text" id="login-user" placeholder="Ej. admin" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600">
+                        <label class="form-label">Usuario</label>
+                        <input type="text" id="login-user" placeholder="Ingrese su usuario" autocomplete="username">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Contraseña</label>
+                        <label class="form-label">Contraseña</label>
                         <div class="relative">
-                            <input type="password" id="login-pass" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 pr-10 font-semibold focus:outline-none focus:border-red-600">
+                            <input type="password" id="login-pass" placeholder="••••••••" class="pr-10" autocomplete="current-password">
                             <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-600">
                                 <i id="toggle-icon" class="fa-solid fa-eye"></i>
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- CAPTCHA -->
+                    <div class="captcha-container mt-4">
+                        <div class="captcha-label"><i class="fa-solid fa-shield-halved text-red-600"></i> Verificación de seguridad</div>
+                        <canvas id="captcha-canvas" class="captcha-canvas" width="280" height="70" onclick="generarCaptcha()" title="Clic para cambiar código"></canvas>
+                        <div class="captcha-input-wrap">
+                            <input type="text" id="captcha-input" class="captcha-input" placeholder="CÓDIGO" maxlength="6" autocomplete="off">
+                            <button type="button" class="captcha-refresh" onclick="generarCaptcha()" title="Generar nuevo código">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
-                    <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Ingresar</button>
-                    <div class="text-xs text-slate-500 text-center pt-2 border-t border-slate-100">
-                       
+                    <div id="lockout-message" class="hidden lockout-message"></div>
+                    
+                    <button onclick="intentarLogin()" id="login-btn" class="btn-login mt-2">
+                        Ingresar al Sistema
+                    </button>
+                    
+                    <div class="text-[10px] text-slate-400 text-center pt-2 border-t border-slate-100 mt-4">
+                        <i class="fa-solid fa-lock mr-1"></i> Conexión segura y encriptada | OGTI v21.0
                     </div>
                 </div>
             </div>
@@ -227,13 +641,41 @@
                     <p class="text-sm text-slate-500 mt-1">Por seguridad, debes cambiar tu contraseña.</p>
                 </div>
                 <div class="space-y-4">
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
-                    <div><label class="block text-sm font-bold text-slate-700 mb-1">Confirmar Contraseña</label><input type="password" id="confirm-pass" placeholder="Repite la contraseña" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-semibold focus:outline-none focus:border-red-600"></div>
+                    <div><label class="form-label">Nueva Contraseña</label><input type="password" id="new-pass" placeholder="Mínimo 8 caracteres" class="w-full"></div>
+                    <div><label class="form-label">Confirmar Contraseña</label><input type="password" id="confirm-pass" placeholder="Repite la contraseña" class="w-full"></div>
                     <div id="change-pass-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
-                    <button onclick="guardarNuevaPassword()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Guardar y Entrar</button>
+                    <button onclick="guardarNuevaPassword()" class="btn-login">Guardar y Entrar</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- INDICADOR DE SEGURIDAD -->
+    <div id="security-indicator" class="security-indicator hidden">
+        <span class="connection-dot" id="connection-dot"></span>
+        <span id="security-text">Conexión segura</span>
+    </div>
+
+    <!-- RELOJ FLOTANTE GLOBAL v21.0 -->
+    <div id="floating-clock" class="hidden">
+        <i class="fa-solid fa-clock clock-icon"></i>
+        <div>
+            <div class="clock-time" id="floating-clock-time">--:--:--</div>
+            <div class="clock-date" id="floating-clock-date">---</div>
+        </div>
+        <div class="clock-controls">
+            <button onclick="resetClockPosition()" title="Restablecer posición"><i class="fa-solid fa-crosshairs"></i></button>
+        </div>
+    </div>
+
+    <!-- ALERTA MODULE FLOTANTE -->
+    <div id="module-alert">
+        <i class="fa-solid fa-bell alert-icon"></i>
+        <div class="alert-name" id="module-alert-name">Nuevo ticket asignado</div>
+        <div class="alert-ticket" id="module-alert-ticket">R-000000</div>
+        <button onclick="cerrarModuleAlert()" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-6 rounded-xl transition">
+            <i class="fa-solid fa-check mr-1"></i> Entendido
+        </button>
     </div>
 
     <!-- ALERTA CENTRAL FLOTANTE -->
@@ -242,6 +684,19 @@
         <h2 class="text-2xl font-extrabold text-slate-800 mb-2">¡Nuevo Ticket!</h2>
         <p id="central-alert-text" class="text-lg font-mono font-bold text-red-600 mb-4">R-000000</p>
         <button onclick="cerrarAlertaCentral()" class="w-full bg-slate-800 text-white font-bold py-2 rounded-xl">Entendido</button>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN -->
+    <div id="confirm-modal">
+        <div class="confirm-card">
+            <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="confirm-title" id="confirm-title">¿Estás seguro?</div>
+            <div class="confirm-text" id="confirm-text">Esta acción no se puede deshacer.</div>
+            <div class="confirm-buttons">
+                <button class="btn-cancel" onclick="cerrarConfirmModal()">Cancelar</button>
+                <button class="btn-confirm" id="confirm-btn-action" onclick="ejecutarConfirmacion()">Confirmar</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODALES Y TOASTS -->
@@ -260,7 +715,7 @@
         <div><div id="chat-notif-name" class="font-bold text-sm text-slate-900"></div><div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div></div>
     </div>
 
-    <!-- HEADER -->
+    <!-- HEADER v21.0 -->
     <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 hidden transition-all duration-500">
         <div class="w-full px-4 py-2 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <div class="flex items-center gap-3 md:gap-5 w-full md:w-auto justify-between md:justify-start">
@@ -270,10 +725,10 @@
                     </div>
                     <div>
                         <h1 class="text-sm md:text-xl font-extrabold tracking-tight flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-3 leading-tight">
-                            OGTI - Control de atenciones 
-                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold shadow-inner w-max">V19.1</span>
+                            MIDIS OGTI 2026
+                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold shadow-inner w-max">V21.0</span>
                         </h1>
-                        <p class="text-[10px] md:text-xs text-red-100 font-medium mt-0.5 hidden md:block">Oficina General de Tecnologías de la Información | MIDIS</p>
+                        <p class="text-[10px] md:text-xs text-red-100 font-medium mt-0.5 hidden md:block">Sistema de Colas Mesa de Ayuda</p>
                     </div>
                 </div>
             </div>
@@ -291,6 +746,12 @@
                 <button onclick="switchView('ranking')" id="btn-rank" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-chart-column mr-1"></i> Módulos</button>
                 <button onclick="switchView('historial')" id="btn-hist" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-red-900/60 hover:bg-red-900 text-white transition"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Historial</button>
                 <button onclick="switchView('usuarios')" id="btn-users" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-amber-500/80 hover:bg-amber-500 text-white transition"><i class="fa-solid fa-users-gear mr-1"></i> Usuarios</button>
+                
+                <!-- BOTÓN PANTALLA COMPLETA MOVIDO AL TÍTULO (HEADER) -->
+                <button onclick="toggleFullScreen()" id="btn-fullscreen" class="hidden px-3 py-1.5 text-xs md:text-sm font-bold rounded-lg bg-slate-800/60 hover:bg-slate-800 text-white transition" title="Pantalla Completa">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+
                 <button onclick="cerrarSesion()" id="btn-logout" class="hidden px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white rounded-lg font-bold text-sm transition ml-auto md:ml-0"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </div>
@@ -409,13 +870,7 @@
                 <h2 class="text-lg md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-display text-emerald-600"></i> MÓDULOS
                 </h2>
-                <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
-                    <button onclick="toggleFullScreen()" id="btn-fullscreen" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-bold transition flex items-center gap-1 md:gap-2 shadow-sm border border-slate-300 text-xs md:text-sm" title="Pantalla Completa">
-                        <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Pantalla Completa</span>
-                    </button>
-                    
-                    <div id="reloj-tv" class="bg-slate-900 text-emerald-400 px-4 py-1.5 md:px-8 md:py-3 rounded-lg md:rounded-2xl font-mono font-black text-xl md:text-5xl tracking-widest border-2 md:border-4 border-slate-700 shadow-2xl">--:--:--</div>
-                </div>
+                <!-- El reloj fijo fue eliminado de aquí para no duplicar el flotante -->
             </div>
             
             <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
@@ -502,7 +957,12 @@
         </div>
     </main>
 
-    <!-- CHAT FLOTANTE MULTIUSUARIO v19.1 -->
+    <!-- BOTÓN ACTIVAR AUDIO FLOTANTE -->
+    <button id="audio-fab" class="hidden" onclick="activarAudioMovil()" title="Activar alertas de voz">
+        <i class="fa-solid fa-volume-high" id="audio-fab-icon"></i>
+    </button>
+
+    <!-- CHAT FLOTANTE MULTIUSUARIO -->
     <button id="chat-fab" class="hidden" onclick="toggleChatPanel()">
         <i class="fa-solid fa-comments"></i>
         <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">0</span>
@@ -559,7 +1019,7 @@
 
     <script>
         /* ============================================
-           ESTADO GLOBAL
+           ESTADO GLOBAL v21.0
            ============================================ */
         let analistasData = [];
         let historialData = [];
@@ -572,15 +1032,24 @@
         let usuarioCambiandoPass = null;
         let timerInterval = null;
         
-        let chartBarras = null, chartDona = null;
-
-        // ===== ESTADO CHAT PRIVADO v19.1 =====
+        // ===== ESTADO CHAT PRIVADO =====
         let chatsPrivados = {};
         let chatActual = { tipo: 'grupal', nombre: null, convId: null, otroUser: null };
         let tabChatActiva = 'grupal';
         let noLeidosGrupal = 0;
         let noLeidosPrivados = {};
         let _prevPrivados = undefined;
+
+        // ===== SEGURIDAD =====
+        let captchaActual = '';
+        let intentosFallidos = 0;
+        let bloqueadoHasta = 0;
+        let audioActivado = false;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // ===== CONFIRMACIÓN MODAL =====
+        let confirmCallback = null;
 
         const AVATAR_COLORS = ['#C5221F','#059669','#2563eb','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
         function colorAvatar(nombre) { let h = 0; for (let i = 0; i < nombre.length; i++) h = nombre.charCodeAt(i) + ((h << 5) - h); return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]; }
@@ -611,26 +1080,150 @@
         function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
 
         /* ============================================
-           AUDIO Y NOTIFICACIONES
+           CONFIRMACIÓN MODAL
+           ============================================ */
+        function mostrarConfirmacion(titulo, texto, callback) {
+            document.getElementById('confirm-title').textContent = titulo;
+            document.getElementById('confirm-text').textContent = texto;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').classList.add('show');
+        }
+        function cerrarConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('show');
+            confirmCallback = null;
+        }
+        function ejecutarConfirmacion() {
+            if (confirmCallback) confirmCallback();
+            cerrarConfirmModal();
+        }
+
+        /* ============================================
+           CAPTCHA
+           ============================================ */
+        function generarCaptcha() {
+            const canvas = document.getElementById('captcha-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let codigo = '';
+            for (let i = 0; i < 6; i++) {
+                codigo += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            captchaActual = codigo;
+            
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#f8fafc');
+            grad.addColorStop(1, '#e2e8f0');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < 8; i++) {
+                ctx.strokeStyle = `rgba(${Math.random()*100+50},${Math.random()*100+50},${Math.random()*100+50},0.3)`;
+                ctx.lineWidth = 1 + Math.random() * 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let i = 0; i < 50; i++) {
+                ctx.fillStyle = `rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.4)`;
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            const colores = ['#C5221F', '#0f172a', '#059669', '#7c3aed', '#b45309'];
+            for (let i = 0; i < codigo.length; i++) {
+                ctx.save();
+                const x = 25 + i * 40;
+                const y = 45 + (Math.random() - 0.5) * 15;
+                ctx.translate(x, y);
+                ctx.rotate((Math.random() - 0.5) * 0.5);
+                ctx.font = `bold ${28 + Math.random() * 10}px 'Courier New', monospace`;
+                ctx.fillStyle = colores[Math.floor(Math.random() * colores.length)];
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(codigo[i], 0, 0);
+                ctx.restore();
+            }
+            
+            document.getElementById('captcha-input').value = '';
+        }
+
+        function validarCaptcha() {
+            const input = document.getElementById('captcha-input').value.trim().toUpperCase();
+            return input === captchaActual;
+        }
+
+        /* ============================================
+           SEGURIDAD - LOGIN
+           ============================================ */
+        function verificarBloqueo() {
+            const ahora = Date.now();
+            if (ahora < bloqueadoHasta) {
+                const restante = Math.ceil((bloqueadoHasta - ahora) / 1000);
+                const lockMsg = document.getElementById('lockout-message');
+                lockMsg.textContent = `🔒 Cuenta bloqueada temporalmente. Intenta en ${restante} segundos.`;
+                lockMsg.classList.remove('hidden');
+                document.getElementById('login-btn').disabled = true;
+                document.getElementById('login-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                setTimeout(verificarBloqueo, 1000);
+                return true;
+            } else {
+                document.getElementById('lockout-message').classList.add('hidden');
+                document.getElementById('login-btn').disabled = false;
+                document.getElementById('login-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+                return false;
+            }
+        }
+
+        function registrarIntentoFallido() {
+            intentosFallidos++;
+            if (intentosFallidos >= 3) {
+                bloqueadoHasta = Date.now() + 60000;
+                intentosFallidos = 0;
+                verificarBloqueo();
+                mostrarToast('🔒 Demasiados intentos. Bloqueado 60 segundos.', 'error');
+            }
+        }
+
+        /* ============================================
+           AUDIO - NOTIFICACIONES DE VOZ
            ============================================ */
         function activarAudioMovil() {
             if ('speechSynthesis' in window) {
-                const m = new SpeechSynthesisUtterance("Alertas activadas");
-                m.volume = 0;
+                const m = new SpeechSynthesisUtterance("Alertas de voz activadas. El sistema notificará los tickets asignados.");
+                m.volume = 0.5;
+                m.lang = 'es-PE';
                 window.speechSynthesis.speak(m);
             }
             if ("Notification" in window && Notification.permission !== "granted") {
                 Notification.requestPermission();
             }
-            document.getElementById('audio-activation-banner').classList.add('hidden');
-            mostrarToast('🔊 Alertas de audio y ventanas emergentes activadas.', 'success');
+            audioActivado = true;
+            document.getElementById('audio-activation-banner')?.classList.add('hidden');
+            const fab = document.getElementById('audio-fab');
+            if (fab) {
+                fab.classList.add('activated');
+                document.getElementById('audio-fab-icon').className = 'fa-solid fa-volume-high';
+                fab.title = 'Alertas de voz activadas';
+            }
+            mostrarToast('🔊 Alertas de audio y voz activadas correctamente.', 'success');
         }
 
-        function reproducirAlertaTicket(detalle) {
+        function reproducirAlertaTicket(detalle, nombreAnalista = '') {
+            if (!audioActivado && !('speechSynthesis' in window)) return;
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const m = new SpeechSynthesisUtterance(`Ticket asignado. ${detalle}`);
-                m.lang='es-PE'; m.rate=1.0; m.volume=1.0;
+                const texto = nombreAnalista 
+                    ? `Nuevo ticket asignado a ${nombreAnalista}. Ticket: ${detalle}`
+                    : `Ticket asignado. ${detalle}`;
+                const m = new SpeechSynthesisUtterance(texto);
+                m.lang = 'es-PE';
+                m.rate = 0.95;
+                m.pitch = 1.1;
+                m.volume = 1.0;
                 setTimeout(() => window.speechSynthesis.speak(m), 300);
             }
         }
@@ -641,14 +1234,99 @@
             }
         }
 
-        function mostrarAlertaCentral(ticket) {
-            document.getElementById('central-alert-text').textContent = ticket;
-            document.getElementById('central-alert').classList.add('show');
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        /* ============================================
+           RELOJ FLOTANTE
+           ============================================ */
+        function iniciarRelojFlotante() {
+            const clock = document.getElementById('floating-clock');
+            if (!clock) return;
+            clock.classList.remove('hidden');
+            
+            function actualizar() {
+                const ahora = new Date();
+                const timeEl = document.getElementById('floating-clock-time');
+                const dateEl = document.getElementById('floating-clock-date');
+                if (timeEl) timeEl.textContent = ahora.toLocaleTimeString('es-PE', { hour12: false });
+                if (dateEl) dateEl.textContent = ahora.toLocaleDateString('es-PE', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase();
+            }
+            actualizar();
+            setInterval(actualizar, 1000);
+            
+            clock.addEventListener('mousedown', iniciarDrag);
+            clock.addEventListener('touchstart', iniciarDrag, { passive: false });
+            document.addEventListener('mousemove', moverDrag);
+            document.addEventListener('touchmove', moverDrag, { passive: false });
+            document.addEventListener('mouseup', terminarDrag);
+            document.addEventListener('touchend', terminarDrag);
+            
+            const posGuardada = localStorage.getItem('ogti_clock_pos');
+            if (posGuardada) {
+                try {
+                    const pos = JSON.parse(posGuardada);
+                    clock.style.top = pos.y + 'px';
+                    clock.style.right = 'auto';
+                    clock.style.left = pos.x + 'px';
+                } catch(e) {}
+            }
         }
 
-        function cerrarAlertaCentral() {
-            document.getElementById('central-alert').classList.remove('show');
+        function iniciarDrag(e) {
+            if (e.target.closest('button')) return;
+            isDragging = true;
+            const clock = document.getElementById('floating-clock');
+            clock.classList.add('dragging');
+            const rect = clock.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            dragOffset.x = clientX - rect.left;
+            dragOffset.y = clientY - rect.top;
+            e.preventDefault();
+        }
+
+        function moverDrag(e) {
+            if (!isDragging) return;
+            const clock = document.getElementById('floating-clock');
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let x = clientX - dragOffset.x;
+            let y = clientY - dragOffset.y;
+            x = Math.max(0, Math.min(x, window.innerWidth - clock.offsetWidth));
+            y = Math.max(0, Math.min(y, window.innerHeight - clock.offsetHeight));
+            clock.style.left = x + 'px';
+            clock.style.top = y + 'px';
+            clock.style.right = 'auto';
+            e.preventDefault();
+        }
+
+        function terminarDrag() {
+            if (!isDragging) return;
+            isDragging = false;
+            const clock = document.getElementById('floating-clock');
+            clock.classList.remove('dragging');
+            const rect = clock.getBoundingClientRect();
+            localStorage.setItem('ogti_clock_pos', JSON.stringify({ x: rect.left, y: rect.top }));
+        }
+
+        function resetClockPosition() {
+            const clock = document.getElementById('floating-clock');
+            clock.style.top = '90px';
+            clock.style.right = '20px';
+            clock.style.left = 'auto';
+            localStorage.removeItem('ogti_clock_pos');
+        }
+
+        /* ============================================
+           ALERTA MODULE FLOTANTE
+           ============================================ */
+        function mostrarModuleAlert(ticket, nombre) {
+            document.getElementById('module-alert-ticket').textContent = ticket;
+            document.getElementById('module-alert-name').textContent = nombre || 'Nuevo ticket asignado';
+            document.getElementById('module-alert').classList.add('show');
+            if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+        }
+
+        function cerrarModuleAlert() {
+            document.getElementById('module-alert').classList.remove('show');
         }
 
         /* ============================================
@@ -669,14 +1347,47 @@
         }
 
         function intentarLogin() {
+            if (verificarBloqueo()) return;
+            
             const user = document.getElementById('login-user').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value;
             const err = document.getElementById('login-error');
             
-            if (!usuariosData[user]) { err.textContent = '❌ Usuario no encontrado.'; err.classList.remove('hidden'); return; }
-            if (usuariosData[user].pass !== pass) { err.textContent = '❌ Contraseña incorrecta.'; err.classList.remove('hidden'); return; }
+            if (!validarCaptcha()) {
+                err.textContent = '❌ Código de verificación incorrecto. Intenta de nuevo.';
+                err.classList.remove('hidden');
+                generarCaptcha();
+                registrarIntentoFallido();
+                return;
+            }
+            
+            if (!user || !pass) {
+                err.textContent = '❌ Complete todos los campos.';
+                err.classList.remove('hidden');
+                generarCaptcha();
+                return;
+            }
+            
+            if (!usuariosData[user]) { 
+                err.textContent = '❌ Usuario no encontrado.'; 
+                err.classList.remove('hidden'); 
+                generarCaptcha();
+                registrarIntentoFallido();
+                return; 
+            }
+            if (usuariosData[user].pass !== pass) { 
+                err.textContent = '❌ Contraseña incorrecta.'; 
+                err.classList.remove('hidden'); 
+                generarCaptcha();
+                registrarIntentoFallido();
+                return; 
+            }
             
             err.classList.add('hidden');
+            intentosFallidos = 0;
+            
+            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { ultimoAcceso: Date.now() });
+            
             if (usuariosData[user].debeCambiar) {
                 usuarioCambiandoPass = user;
                 document.getElementById('login-form-area').classList.add('hidden');
@@ -684,7 +1395,7 @@
                 return;
             }
             sesionActual = { user, ...usuariosData[user] };
-            sessionStorage.setItem('ogti_session_v19', JSON.stringify(sesionActual));
+            sessionStorage.setItem('ogti_session_v21', JSON.stringify(sesionActual));
             iniciarSesionUI();
         }
 
@@ -692,21 +1403,34 @@
             const p1 = document.getElementById('new-pass').value;
             const p2 = document.getElementById('confirm-pass').value;
             const err = document.getElementById('change-pass-error');
-            if (p1.length < 6) { err.textContent = '⚠️ Mínimo 6 caracteres.'; err.classList.remove('hidden'); return; }
+            
+            if (p1.length < 8) { err.textContent = '⚠️ Mínimo 8 caracteres.'; err.classList.remove('hidden'); return; }
+            if (!/[A-Z]/.test(p1)) { err.textContent = '⚠️ Debe contener al menos una mayúscula.'; err.classList.remove('hidden'); return; }
+            if (!/[0-9]/.test(p1)) { err.textContent = '⚠️ Debe contener al menos un número.'; err.classList.remove('hidden'); return; }
             if (p1 !== p2) { err.textContent = '⚠️ No coinciden.'; err.classList.remove('hidden'); return; }
             err.classList.add('hidden');
+            
             const user = usuarioCambiandoPass;
             
             window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: p1, debeCambiar: false }).then(() => {
                 usuariosData[user].pass = p1; usuariosData[user].debeCambiar = false;
                 sesionActual = { user, ...usuariosData[user] };
-                sessionStorage.setItem('ogti_session_v19', JSON.stringify(sesionActual));
+                sessionStorage.setItem('ogti_session_v21', JSON.stringify(sesionActual));
                 iniciarSesionUI();
             });
         }
 
-        function cerrarSesion() { sessionStorage.removeItem('ogti_session_v19'); location.reload(); }
-        function verificarSesionAlCargar() { const s = sessionStorage.getItem('ogti_session_v19'); if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); } }
+        function cerrarSesion() {
+            mostrarConfirmacion('Cerrar Sesión', '¿Estás seguro de que deseas cerrar sesión?', () => {
+                sessionStorage.removeItem('ogti_session_v21');
+                location.reload();
+            });
+        }
+        
+        function verificarSesionAlCargar() {
+            const s = sessionStorage.getItem('ogti_session_v21');
+            if (s) { sesionActual = JSON.parse(s); iniciarSesionUI(); }
+        }
 
         function iniciarSesionUI() {
             if (!sesionActual) return;
@@ -716,8 +1440,14 @@
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('btn-logout').classList.remove('hidden');
             document.getElementById('chat-fab').classList.remove('hidden');
+            document.getElementById('security-indicator').classList.remove('hidden');
             document.getElementById('user-name-display').textContent = sesionActual.nombre;
             document.getElementById('user-role-display').textContent = sesionActual.rol;
+            
+            iniciarRelojFlotante();
+            
+            const audioFab = document.getElementById('audio-fab');
+            if (audioFab) audioFab.classList.remove('hidden');
             
             const rol = sesionActual.rol;
             document.getElementById('btn-rank').classList.remove('hidden'); 
@@ -726,32 +1456,32 @@
                 document.getElementById('btn-op').classList.remove('hidden');
                 document.getElementById('btn-hist').classList.remove('hidden');
                 document.getElementById('btn-users').classList.remove('hidden');
+                document.getElementById('btn-fullscreen').classList.remove('hidden');
             } else if (rol === 'operador') {
                 document.getElementById('btn-op').classList.remove('hidden');
                 document.getElementById('btn-hist').classList.remove('hidden');
+                document.getElementById('btn-fullscreen').classList.remove('hidden');
             }
             
             if (rol === 'analista') {
                 document.getElementById('analista-dashboard').classList.remove('hidden');
-                document.getElementById('reloj-tv').classList.add('hidden');
                 document.getElementById('btn-fullscreen').classList.add('hidden');
                 renderAnalistaDashboard();
                 document.getElementById('audio-activation-banner').classList.remove('hidden');
             } else {
                 document.getElementById('analista-dashboard').classList.add('hidden');
-                document.getElementById('reloj-tv').classList.remove('hidden');
-                document.getElementById('btn-fullscreen').classList.remove('hidden');
             }
             
             switchView('ranking');
             iniciarReloj();
 
-            // Inicializar chat en vista lista
             chatActual = { tipo: 'grupal', nombre: null, convId: null, otroUser: null };
             document.getElementById('chat-conversation-view')?.classList.add('hidden');
             document.getElementById('chat-list-view')?.classList.remove('hidden');
             document.getElementById('chat-back-btn')?.classList.remove('show');
             renderListaConversaciones();
+            
+            generarCaptcha();
         }
 
         /* ============================================
@@ -766,7 +1496,6 @@
                 } else { 
                     usuariosData = data; 
                     renderTablaUsuarios(); 
-                    // Refrescar lista de conversaciones si está abierta
                     if (tabChatActiva === 'privados' && chatAbierto) renderListaConversaciones();
                 }
             });
@@ -783,9 +1512,9 @@
                         const yoAhora = analistasData.find(x => x.nombre === sesionActual.nombre);
                         
                         if (yoAhora && yoAhora.estado === 'ocupado' && (!yoAntes || yoAntes.ticket !== yoAhora.ticket)) {
-                            reproducirAlertaTicket(`${yoAhora.ticket}`);
+                            reproducirAlertaTicket(`${yoAhora.ticket}`, sesionActual.nombre);
                             enviarNotificacionPush("¡Nueva Atención!", `Ticket ${yoAhora.ticket}`);
-                            mostrarAlertaCentral(yoAhora.ticket);
+                            mostrarModuleAlert(yoAhora.ticket, `Asignado a: ${sesionActual.nombre}`);
                         }
                     }
                 } else {
@@ -808,7 +1537,6 @@
                 }
             });
 
-            // ===== CHAT GRUPAL =====
             const chatRef = window.firebaseQuery(window.firebaseRef(window.firebaseDB, 'chat'), window.firebaseLimitToLast(100));
             window.firebaseOnValue(chatRef, (snapshot) => {
                 const data = snapshot.val();
@@ -830,7 +1558,6 @@
                 }
             });
 
-            // ===== CHATS PRIVADOS =====
             if (sesionActual) {
                 const privRef = window.firebaseRef(window.firebaseDB, 'chats_privados');
                 window.firebaseOnValue(privRef, (snapshot) => {
@@ -918,32 +1645,34 @@
             }
         }
 
-        async function finalizarAtencionAnalista() {
+        function finalizarAtencionAnalista() {
             if (sesionActual?.rol !== 'analista') return;
             const nombre = sesionActual.nombre;
             const a = analistasData.find(x => x.nombre === nombre);
             if (!a || a.estado !== 'ocupado') return;
 
-            if (!confirm("¿Estás seguro de finalizar y liberar esta atención?")) return;
+            mostrarConfirmacion(
+                'Finalizar Atención',
+                '¿Estás seguro de finalizar y liberar esta atención?',
+                async () => {
+                    const ticketAnterior = a.ticket;
+                    a.estado = 'libre'; a.ticket = '-'; a.foto = null; a.comentario = null; a.startTime = null;
 
-            const ticketAnterior = a.ticket;
-            a.estado = 'libre'; a.ticket = '-'; a.foto = null; a.comentario = null; a.startTime = null;
+                    await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
 
-            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
+                    const nuevoHistorial = { fecha: new Date().toISOString(), nombre: nombre, ticket: ticketAnterior, evento: 'cierre', comentario: 'Finalizado por el analista', foto: null };
+                    historialData.unshift(nuevoHistorial);
+                    await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
 
-            const nuevoHistorial = { fecha: new Date().toISOString(), nombre: nombre, ticket: ticketAnterior, evento: 'cierre', comentario: 'Finalizado por el analista', foto: null };
-            historialData.unshift(nuevoHistorial);
-            await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
-
-            mostrarToast('Atención finalizada correctamente.', 'success');
-            renderAnalistaDashboard();
+                    mostrarToast('Atención finalizada correctamente.', 'success');
+                    renderAnalistaDashboard();
+                }
+            );
         }
 
         function iniciarReloj() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                const el = document.getElementById('reloj-tv');
-                if (el && !el.classList.contains('hidden')) el.textContent = new Date().toLocaleTimeString('es-PE');
                 actualizarTiemposVista();
             }, 1000);
         }
@@ -1102,6 +1831,7 @@
             await window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), historialData);
             
             enviarNotificacionPush("Nueva Atención OGTI", `Ticket ${ticketSel} asignado a ${nombreSel}`);
+            reproducirAlertaTicket(ticketSel, nombreSel);
             
             mostrarToast(`Atención asignada a ${nombreSel} (${ticketSel})`, 'success');
             limpiarFormularioTicket();
@@ -1296,11 +2026,16 @@
         
         function limpiarRegistros() {
             if (sesionActual.rol === 'analista') return;
-            if (!confirm("¿Reiniciar TODOS los tickets e historial?")) return;
-            analistasData.forEach(a => { a.estado='libre'; a.ticket='-'; a.foto=null; a.comentario=null; a.startTime=null; a.totalR=0; a.totalI=0; });
-            window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
-            window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), []);
-            mostrarToast('Sistema reiniciado.', 'info');
+            mostrarConfirmacion(
+                'Reiniciar Sistema',
+                '¿Estás seguro de reiniciar TODOS los tickets e historial? Esta acción no se puede deshacer.',
+                () => {
+                    analistasData.forEach(a => { a.estado='libre'; a.ticket='-'; a.foto=null; a.comentario=null; a.startTime=null; a.totalR=0; a.totalI=0; });
+                    window.firebaseSet(window.firebaseRef(window.firebaseDB, 'analistas'), analistasData);
+                    window.firebaseSet(window.firebaseRef(window.firebaseDB, 'historial'), []);
+                    mostrarToast('Sistema reiniciado.', 'info');
+                }
+            );
         }
 
         /* ============================================
@@ -1311,11 +2046,15 @@
             const user = document.getElementById('new-user-name').value.trim().toLowerCase();
             const nombre = document.getElementById('new-user-realname').value.trim();
             const rol = document.getElementById('new-user-role').value;
-            if (!user || !nombre) { alert('Complete todos los campos.'); return; }
-            if (usuariosData[user]) { alert('El usuario ya existe.'); return; }
+            if (!user || !nombre) { mostrarToast('Complete todos los campos.', 'error'); return; }
+            if (usuariosData[user]) { mostrarToast('El usuario ya existe.', 'error'); return; }
+            
+            if (!/^[a-z0-9._-]+$/.test(user)) { mostrarToast('Usuario solo puede tener letras, números, puntos, guiones.', 'error'); return; }
 
-            window.firebaseSet(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { user, nombre, rol, pass: '123456', debeCambiar: true }).then(() => {
-                mostrarToast(`Usuario ${user} creado. Pass: 123456`, 'success');
+            window.firebaseSet(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { 
+                user, nombre, rol, pass: '123456', debeCambiar: true, creado: Date.now() 
+            }).then(() => {
+                mostrarToast(`Usuario ${user} creado. Contraseña temporal: 123456`, 'success');
                 document.getElementById('new-user-name').value = '';
                 document.getElementById('new-user-realname').value = '';
             });
@@ -1331,18 +2070,27 @@
 
         function resetearPassword(user) {
             if (sesionActual.rol !== 'admin') return;
-            if (!confirm(`¿Resetear contraseña de ${user} a "123456"?`)) return;
-            window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: '123456', debeCambiar: true }).then(() => mostrarToast('Contraseña reseteada.', 'info'));
+            mostrarConfirmacion(
+                'Resetear Contraseña',
+                `¿Resetear contraseña de ${user} a "123456"?`,
+                () => {
+                    window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `usuarios/${user}`), { pass: '123456', debeCambiar: true }).then(() => mostrarToast('Contraseña reseteada.', 'info'));
+                }
+            );
         }
 
         function eliminarUsuario(user) {
             if (sesionActual.rol !== 'admin') return;
             if (user === 'admin') { mostrarToast('No puedes eliminar al administrador principal.', 'error'); return; }
-            if (!confirm(`¿Estás seguro de eliminar al usuario ${user}? No podrá volver a iniciar sesión.`)) return;
-            
-            window.firebaseRemove(window.firebaseRef(window.firebaseDB, `usuarios/${user}`)).then(() => {
-                mostrarToast(`Usuario ${user} eliminado correctamente.`, 'success');
-            });
+            mostrarConfirmacion(
+                'Eliminar Usuario',
+                `¿Estás seguro de eliminar al usuario ${user}? No podrá volver a iniciar sesión.`,
+                () => {
+                    window.firebaseRemove(window.firebaseRef(window.firebaseDB, `usuarios/${user}`)).then(() => {
+                        mostrarToast(`Usuario ${user} eliminado correctamente.`, 'success');
+                    });
+                }
+            );
         }
 
         function renderTablaUsuarios() {
@@ -1377,7 +2125,7 @@
         }
 
         /* ============================================
-           CHAT MULTIUSUARIO - v19.1 con PRIVADOS
+           CHAT MULTIUSUARIO
            ============================================ */
         function construirConvId(userA, userB) {
             return [userA, userB].sort().join('_');
@@ -1418,7 +2166,6 @@
                 return;
             }
             
-            // Tab privados
             const otrosUsuarios = Object.values(usuariosData).filter(u => u.user !== sesionActual.user);
             const convs = otrosUsuarios.map(u => {
                 const convId = construirConvId(sesionActual.user, u.user);
@@ -1734,6 +2481,8 @@
                 document.getElementById('main-header').style.transform = 'translateY(-100%)';
                 document.getElementById('main-header').style.opacity = '0';
                 document.getElementById('main-header').style.position = 'absolute';
+                const clock = document.getElementById('floating-clock');
+                if (clock) clock.style.zIndex = '500';
             } else {
                 document.getElementById('main-header').style.transform = 'translateY(0)';
                 document.getElementById('main-header').style.opacity = '1';
@@ -1741,8 +2490,42 @@
             }
         });
 
+        /* ============================================
+           INICIALIZACIÓN
+           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
+            generarCaptcha();
+            monitorearConexion();
             verificarSesionAlCargar();
+        });
+
+        function monitorearConexion() {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('security-text');
+            const indicator = document.getElementById('security-indicator');
+            
+            setInterval(() => {
+                if (!dot) return;
+                if (navigator.onLine && firebaseListo) {
+                    dot.classList.remove('offline');
+                    text.textContent = 'Conexión segura';
+                    indicator.classList.remove('warning', 'danger');
+                } else {
+                    dot.classList.add('offline');
+                    text.textContent = 'Sin conexión';
+                    indicator.classList.add('danger');
+                }
+            }, 3000);
+        }
+
+        window.addEventListener('beforeunload', (e) => {
+            if (sesionActual && sesionActual.rol === 'analista') {
+                const a = analistasData.find(x => x.nombre === sesionActual.nombre);
+                if (a && a.estado === 'ocupado') {
+                    e.preventDefault();
+                    e.returnValue = 'Tienes una atención en curso. ¿Seguro que deseas salir?';
+                }
+            }
         });
     </script>
 </body>
