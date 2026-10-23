@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OGTI v19.0 - Control de atenciones</title>
+    <title>OGTI v19.1 - Control de atenciones</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
         window.firebaseLimitToLast = limitToLast;
         window.firebaseGet = get;
         window.firebaseUpdate = update;
-        window.firebaseRemove = remove; // IMPORTANTE PARA ELIMINAR
+        window.firebaseRemove = remove;
         
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
@@ -51,38 +51,32 @@
         .full-screen-wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; box-sizing: border-box; padding: 16px; }
         @media (min-width: 768px) { .full-screen-wrapper { padding: 24px; } }
         
-        /* Animaciones de luces */
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
         .dot-red { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; animation: pulse-red 1.5s infinite; }
         .dot-green { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; }
         .dot-yellow { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #eab308; }
 
-        /* Tablas Generales */
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background-color: var(--header-bg); color: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 16px; }
         td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 0.9rem; vertical-align: middle; background: white; }
         @media (min-width: 768px) { th { padding: 16px 24px; } td { padding: 16px 24px; font-size: 0.95rem; } }
         tr:hover td { background-color: #f8fafc; }
         
-        /* Pills de Estado */
         .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
         .status-free { background-color: #dcfce7; color: #166534; }
         .status-busy { background-color: #fee2e2; color: #991b1b; }
         .status-vacaciones { background-color: #fef08a; color: #854d0e; }
 
-        /* Barras de progreso */
         .progress-wrapper { display: flex; align-items: center; gap: 8px; }
         .progress-text { font-weight: 800; font-size: 0.85rem; color: #0f172a; line-height: 1.1; }
         .progress-pct { font-size: 0.65rem; color: #64748b; font-weight: 600; }
         .bar-bg { flex-grow: 1; background-color: #f1f5f9; height: 10px; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); border-radius: 10px; }
 
-        /* Badges de tiempo */
         .time-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
         .time-warning { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
         .time-normal { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
-        /* Tarjetas Módulos */
         .card-analyst { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; border: 2px solid transparent; }
         @media (min-width: 768px) { .card-analyst { padding: 24px; } }
         .card-analyst.available { border-color: #bbf7d0; background: linear-gradient(to bottom, #ffffff, #f0fdf4); }
@@ -95,7 +89,6 @@
         .card-analyst.busy .main-action { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
         .card-analyst.vacation .main-action { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-        /* Login */
         #login-screen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(135deg, #7f1d1d, #991b1b); display: flex; align-items: center; justify-content: center; padding: 16px; }
         #login-card { background: white; border-radius: 24px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         @media (min-width: 768px) { #login-card { padding: 40px; } }
@@ -105,7 +98,6 @@
         .tooltip-img:hover .tooltip-content { visibility: visible; opacity: 1; }
         .tooltip-img .tooltip-content img { width: 180px; height: auto; border-radius: 8px; }
 
-        /* CHAT STYLES */
         #chat-fab { position: fixed; bottom: 16px; right: 16px; z-index: 400; width: 56px; height: 56px; border-radius: 50%; background: #C5221F; color: white; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white; box-shadow: 0 10px 25px rgba(197,34,31,0.4); transition: transform 0.2s; }
         @media (min-width: 768px) { #chat-fab { bottom: 24px; right: 24px; width: 60px; height: 60px; } }
         #chat-fab:hover { transform: scale(1.1); }
@@ -146,7 +138,6 @@
         .mention-item { padding: 10px 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; }
         .mention-item:hover { background: #f1f5f9; color: #C5221F; }
 
-        /* Emoji Picker */
         #emoji-picker { position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 250px; max-height: 200px; overflow-y: auto; display: none; z-index: 500; margin-bottom: 8px; padding: 8px; grid-template-columns: repeat(6, 1fr); gap: 4px; }
         #emoji-picker.show { display: grid; }
         .emoji-btn { font-size: 1.2rem; cursor: pointer; padding: 4px; text-align: center; border-radius: 4px; transition: background 0.2s; }
@@ -154,18 +145,15 @@
         
         .hidden { display: none !important; }
 
-        /* Gráficas contenedores */
         .chart-card { background: white; border-radius: 20px; padding: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         @media (min-width: 768px) { .chart-card { padding: 24px; } }
         .chart-title { font-weight: 800; font-size: 0.9rem; color: #0f172a; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
         .chart-canvas-wrap { position: relative; height: 220px; }
         @media (min-width: 768px) { .chart-canvas-wrap { height: 280px; } }
 
-        /* PANTALLA COMPLETA */
         .fullscreen-active #main-header { transform: translateY(-100%); opacity: 0; pointer-events: none; position: absolute; }
         .fullscreen-active .full-screen-wrapper { padding-top: 20px; }
 
-        /* NUEVA ALERTA CENTRAL */
         #central-alert {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             background: white; border-radius: 20px; padding: 30px; z-index: 2000;
@@ -175,6 +163,28 @@
         }
         #central-alert.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
         #central-alert i { font-size: 3rem; color: #C5221F; margin-bottom: 15px; animation: pulse-red 1s infinite; }
+
+        /* ===== CHAT PRIVADO - v19.1 ===== */
+        .chat-tabs { display: flex; background: #e2e8f0; padding: 4px; gap: 4px; border-bottom: 1px solid #cbd5e1; }
+        .chat-tab { flex: 1; padding: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
+        .chat-tab.active { background: white; color: #C5221F; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .chat-tab .tab-badge { display: inline-block; background: #eab308; color: black; font-size: 0.6rem; padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: 800; }
+
+        .chat-conv-list { overflow-y: auto; flex: 1; background: #f8fafc; }
+        .chat-conv-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #e2e8f0; transition: background 0.2s; }
+        .chat-conv-item:hover { background: #f1f5f9; }
+        .chat-conv-item.active { background: #fee2e2; border-left: 4px solid #C5221F; }
+        .chat-conv-item .conv-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+        .chat-conv-item .conv-info { flex: 1; min-width: 0; }
+        .chat-conv-item .conv-name { font-weight: 700; font-size: 0.85rem; color: #0f172a; }
+        .chat-conv-item .conv-last { font-size: 0.7rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-conv-item .conv-badge { background: #eab308; color: black; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; flex-shrink: 0; }
+
+        .chat-btn-private { background: #0f172a; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; margin-top: 8px; width: 100%; transition: background 0.2s; }
+        .chat-btn-private:hover { background: #C5221F; }
+
+        #chat-back-btn { display: none; }
+        #chat-back-btn.show { display: flex; }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col justify-between">
@@ -186,7 +196,7 @@
                 <div class="text-center mb-6">
                     <img src="logo.png" alt="MIDIS" class="h-14 mx-auto mb-4" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/2/23/Logo_Midis_Per%C3%BA.png'">
                     <h1 class="text-2xl font-extrabold text-slate-900">OGTI Control</h1>
-                    <p class="text-sm text-slate-500 mt-1">v19.0 - Gestión Integral</p>
+                    <p class="text-sm text-slate-500 mt-1">v19.1 - Gestión Integral</p>
                 </div>
                 <div class="space-y-4">
                     <div>
@@ -205,7 +215,7 @@
                     <div id="login-error" class="hidden text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2"></div>
                     <button onclick="intentarLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg">Ingresar</button>
                     <div class="text-xs text-slate-500 text-center pt-2 border-t border-slate-100">
-                        <div>Admin inicial: <span class="font-mono bg-red-50 px-2 py-0.5 rounded">alara</span></div>
+                       
                     </div>
                 </div>
             </div>
@@ -250,19 +260,18 @@
         <div><div id="chat-notif-name" class="font-bold text-sm text-slate-900"></div><div id="chat-notif-text" class="text-xs text-slate-600 mt-1 line-clamp-2"></div></div>
     </div>
 
-    <!-- HEADER (DISEÑO SEGÚN IMAGEN) -->
+    <!-- HEADER -->
     <header id="main-header" class="bg-gradient-to-r from-red-700 via-rose-600 to-red-800 text-white shadow-xl sticky top-0 z-50 hidden transition-all duration-500">
         <div class="w-full px-4 py-2 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <div class="flex items-center gap-3 md:gap-5 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center gap-3 md:gap-5">
-                    <!-- Recuadro blanco del logo -->
                     <div class="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl shadow-lg border border-white/20 flex items-center justify-center">
                         <img src="logo.png" alt="MIDIS" class="h-6 md:h-8 object-contain" onerror="this.src='https://placehold.co/100x30/C5221F/ffffff?text=MIDIS'">
                     </div>
                     <div>
                         <h1 class="text-sm md:text-xl font-extrabold tracking-tight flex flex-col md:flex-row items-start md:items-center gap-1 md:gap-3 leading-tight">
                             OGTI - Control de atenciones 
-                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold shadow-inner w-max">V19.0</span>
+                            <span class="text-[9px] md:text-[10px] bg-red-900/80 border border-red-500 text-white px-2 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold shadow-inner w-max">V19.1</span>
                         </h1>
                         <p class="text-[10px] md:text-xs text-red-100 font-medium mt-0.5 hidden md:block">Oficina General de Tecnologías de la Información | MIDIS</p>
                     </div>
@@ -270,7 +279,6 @@
             </div>
             
             <div class="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                <!-- Info de usuario (Estilo botón como en la imagen) -->
                 <div id="user-info" class="hidden flex items-center gap-2 bg-red-800/80 border border-red-500 rounded-lg px-3 py-1 shadow-md">
                     <i class="fa-solid fa-user-circle text-lg text-white"></i>
                     <div class="text-[10px] text-left leading-tight text-white">
@@ -290,7 +298,6 @@
 
     <main id="main-content" class="full-screen-wrapper w-full flex-grow hidden">
         
-        <!-- BOTÓN PARA ACTIVAR AUDIO EN MÓVILES -->
         <div id="audio-activation-banner" class="hidden bg-amber-100 border border-amber-300 text-amber-800 p-3 rounded-xl mb-4 flex justify-between items-center shadow-sm">
             <div class="text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-volume-high text-lg"></i> Para escuchar las alertas de tickets, toca este botón.</div>
             <button onclick="activarAudioMovil()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-lg text-xs">Activar</button>
@@ -339,7 +346,6 @@
                 </div>
             </div>
 
-            <!-- Tabla Operador Responsiva -->
             <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table class="min-w-full">
                     <thead>
@@ -360,7 +366,6 @@
         <!-- VIEW: RANKING Y MODULOS -->
         <div id="view-ranking" class="space-y-4 md:space-y-6 w-full hidden">
             
-            <!-- TARJETA EXCLUSIVA PARA ANALISTAS -->
             <div id="analista-dashboard" class="hidden bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-3 md:gap-4 w-full md:w-auto">
@@ -371,7 +376,6 @@
                         </div>
                     </div>
                     
-                    <!-- TICKET DESTACADO -->
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 w-full md:w-auto flex flex-col gap-3 md:min-w-[280px]">
                         <div class="flex justify-between items-center gap-4 border-b border-slate-200 pb-2">
                             <div>
@@ -384,7 +388,6 @@
                             </div>
                         </div>
                         
-                        <!-- EVIDENCIA Y COMENTARIO (Clickeable) -->
                         <div id="ana-evidencia-box" class="hidden cursor-pointer hover:bg-slate-200 transition rounded-lg p-2 border border-slate-200 bg-white flex items-center gap-2" onclick="abrirModalEvidenciaAnalista()">
                             <i class="fa-solid fa-image text-red-600 text-xl"></i>
                             <div class="text-xs text-slate-600 line-clamp-2 flex-1" id="ana-comentario-preview">
@@ -402,26 +405,21 @@
                 </div>
             </div>
 
-            <!-- BARRA SUPERIOR DE MODULOS -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-2 gap-3 md:gap-4">
                 <h2 class="text-lg md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-display text-emerald-600"></i> MÓDULOS
                 </h2>
                 <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
-                    <!-- BOTÓN DE PANTALLA COMPLETA -->
                     <button onclick="toggleFullScreen()" id="btn-fullscreen" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-bold transition flex items-center gap-1 md:gap-2 shadow-sm border border-slate-300 text-xs md:text-sm" title="Pantalla Completa">
                         <i class="fa-solid fa-expand"></i> <span class="hidden md:inline">Pantalla Completa</span>
                     </button>
                     
-                    <!-- Reloj para TV (Solo para Operadores/Admin) -->
                     <div id="reloj-tv" class="bg-slate-900 text-emerald-400 px-4 py-1.5 md:px-8 md:py-3 rounded-lg md:rounded-2xl font-mono font-black text-xl md:text-5xl tracking-widest border-2 md:border-4 border-slate-700 shadow-2xl">--:--:--</div>
                 </div>
             </div>
             
-            <!-- Tarjetas Módulos -->
             <div id="grid-analistas-modulos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
 
-            <!-- TABLA DE RANKING -->
             <div class="bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
                 <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                     <h3 class="font-bold text-slate-800"><i class="fa-solid fa-ranking-star text-red-600 mr-2"></i> RANKING DE ATENCIONES</h3>
@@ -466,7 +464,7 @@
             </div>
         </div>
 
-        <!-- VIEW: USUARIOS (CON COLUMNA ELIMINAR) -->
+        <!-- VIEW: USUARIOS -->
         <div id="view-usuarios" class="space-y-4 md:space-y-6 w-full hidden">
             <div class="bg-white rounded-xl md:rounded-3xl p-4 md:p-8 shadow-xl">
                 <div class="flex justify-between items-center mb-4 md:mb-6 pb-3 md:pb-4 border-b">
@@ -504,7 +502,7 @@
         </div>
     </main>
 
-    <!-- CHAT FLOTANTE MULTIUSUARIO -->
+    <!-- CHAT FLOTANTE MULTIUSUARIO v19.1 -->
     <button id="chat-fab" class="hidden" onclick="toggleChatPanel()">
         <i class="fa-solid fa-comments"></i>
         <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">0</span>
@@ -513,26 +511,48 @@
     <div id="chat-panel">
         <div class="chat-header">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
+                <button id="chat-back-btn" onclick="volverListaConversaciones()" class="text-white hover:bg-white/20 p-1 rounded-lg transition items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div id="chat-header-icon" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
                 <div>
-                    <div class="font-extrabold text-sm">Chat del Equipo</div>
-                    <div class="text-[10px] opacity-90 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> En línea</div>
+                    <div id="chat-header-title" class="font-extrabold text-sm">Chat del Equipo</div>
+                    <div id="chat-header-status" class="text-[10px] opacity-90 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> En línea</div>
                 </div>
             </div>
             <button onclick="toggleChatPanel()" class="text-white hover:bg-white/20 p-2 rounded-lg transition"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
-        <div class="chat-body" id="chat-body"></div>
-        <div class="chat-footer">
-            <img id="chat-photo-preview" class="hidden max-h-16 rounded-lg mb-2 border-2 border-red-600">
-            <div class="chat-input-wrap">
-                <div id="mention-menu"></div>
-                <div id="emoji-picker"></div>
-                
-                <button onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-yellow-500 px-1 pb-1 transition"><i class="fa-regular fa-face-smile text-xl"></i></button>
-                <button onclick="document.getElementById('chat-file').click()" class="text-slate-400 hover:text-red-600 px-1 pb-1 transition"><i class="fa-solid fa-camera text-xl"></i></button>
-                <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="procesarFotoChat(event)">
-                <textarea id="chat-input" class="chat-input" rows="1" placeholder="Escribe un mensaje..."></textarea>
-                <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+        
+        <!-- VISTA 1: LISTA DE CONVERSACIONES -->
+        <div id="chat-list-view" class="flex flex-col flex-1 overflow-hidden">
+            <div class="chat-tabs">
+                <div id="tab-grupal" class="chat-tab active" onclick="cambiarTabChat('grupal')">
+                    <i class="fa-solid fa-users"></i> Equipo
+                    <span id="badge-grupal" class="tab-badge hidden">0</span>
+                </div>
+                <div id="tab-privados" class="chat-tab" onclick="cambiarTabChat('privados')">
+                    <i class="fa-solid fa-user-lock"></i> Privados
+                    <span id="badge-privados" class="tab-badge hidden">0</span>
+                </div>
+            </div>
+            <div id="chat-conv-list" class="chat-conv-list"></div>
+        </div>
+        
+        <!-- VISTA 2: CONVERSACIÓN ACTIVA -->
+        <div id="chat-conversation-view" class="flex flex-col flex-1 overflow-hidden hidden">
+            <div class="chat-body" id="chat-body"></div>
+            <div class="chat-footer">
+                <img id="chat-photo-preview" class="hidden max-h-16 rounded-lg mb-2 border-2 border-red-600">
+                <div class="chat-input-wrap">
+                    <div id="mention-menu"></div>
+                    <div id="emoji-picker"></div>
+                    
+                    <button onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-yellow-500 px-1 pb-1 transition"><i class="fa-regular fa-face-smile text-xl"></i></button>
+                    <button onclick="document.getElementById('chat-file').click()" class="text-slate-400 hover:text-red-600 px-1 pb-1 transition"><i class="fa-solid fa-camera text-xl"></i></button>
+                    <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="procesarFotoChat(event)">
+                    <textarea id="chat-input" class="chat-input" rows="1" placeholder="Escribe un mensaje..."></textarea>
+                    <button class="chat-send" onclick="enviarMensajeChat()"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -548,12 +568,19 @@
         let sesionActual = null;
         let firebaseListo = false;
         let chatAbierto = false;
-        let mensajesNoLeidos = 0;
         let tempFotoChat = null;
         let usuarioCambiandoPass = null;
         let timerInterval = null;
         
-        let chartBarras = null, chartDona = null; // Ya no se usa chartAnalista
+        let chartBarras = null, chartDona = null;
+
+        // ===== ESTADO CHAT PRIVADO v19.1 =====
+        let chatsPrivados = {};
+        let chatActual = { tipo: 'grupal', nombre: null, convId: null, otroUser: null };
+        let tabChatActiva = 'grupal';
+        let noLeidosGrupal = 0;
+        let noLeidosPrivados = {};
+        let _prevPrivados = undefined;
 
         const AVATAR_COLORS = ['#C5221F','#059669','#2563eb','#d97706','#7c3aed','#db2777','#0891b2','#65a30d'];
         function colorAvatar(nombre) { let h = 0; for (let i = 0; i < nombre.length; i++) h = nombre.charCodeAt(i) + ((h << 5) - h); return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]; }
@@ -584,7 +611,7 @@
         function cerrarModalFoto() { document.getElementById('photo-modal').classList.add('hidden'); }
 
         /* ============================================
-           AUDIO Y NOTIFICACIONES EN MÓVILES
+           AUDIO Y NOTIFICACIONES
            ============================================ */
         function activarAudioMovil() {
             if ('speechSynthesis' in window) {
@@ -610,10 +637,7 @@
 
         function enviarNotificacionPush(titulo, cuerpo) {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(titulo, {
-                    body: cuerpo,
-                    icon: "logo.png"
-                });
+                new Notification(titulo, { body: cuerpo, icon: "logo.png" });
             }
         }
 
@@ -709,7 +733,6 @@
             
             if (rol === 'analista') {
                 document.getElementById('analista-dashboard').classList.remove('hidden');
-                // Ocultar reloj y botón de pantalla completa para analistas
                 document.getElementById('reloj-tv').classList.add('hidden');
                 document.getElementById('btn-fullscreen').classList.add('hidden');
                 renderAnalistaDashboard();
@@ -722,6 +745,13 @@
             
             switchView('ranking');
             iniciarReloj();
+
+            // Inicializar chat en vista lista
+            chatActual = { tipo: 'grupal', nombre: null, convId: null, otroUser: null };
+            document.getElementById('chat-conversation-view')?.classList.add('hidden');
+            document.getElementById('chat-list-view')?.classList.remove('hidden');
+            document.getElementById('chat-back-btn')?.classList.remove('show');
+            renderListaConversaciones();
         }
 
         /* ============================================
@@ -733,7 +763,12 @@
                 const data = snapshot.val();
                 if (!data) {
                     window.firebaseSet(usersRef, { admin: { user: 'admin', nombre: 'Administrador', rol: 'admin', pass: 'admin123', debeCambiar: false } });
-                } else { usuariosData = data; renderTablaUsuarios(); }
+                } else { 
+                    usuariosData = data; 
+                    renderTablaUsuarios(); 
+                    // Refrescar lista de conversaciones si está abierta
+                    if (tabChatActiva === 'privados' && chatAbierto) renderListaConversaciones();
+                }
             });
 
             const analistasRef = window.firebaseRef(window.firebaseDB, 'analistas');
@@ -773,6 +808,7 @@
                 }
             });
 
+            // ===== CHAT GRUPAL =====
             const chatRef = window.firebaseQuery(window.firebaseRef(window.firebaseDB, 'chat'), window.firebaseLimitToLast(100));
             window.firebaseOnValue(chatRef, (snapshot) => {
                 const data = snapshot.val();
@@ -781,17 +817,49 @@
                     if (chatMensajes.length > 0 && nuevos.length > chatMensajes.length) {
                         const ultimo = nuevos[nuevos.length - 1];
                         if (ultimo.user !== sesionActual?.user) {
-                            mostrarNotificacionChat(ultimo);
-                            if (!chatAbierto) { mensajesNoLeidos++; actualizarBadgeChat(); }
+                            mostrarNotificacionChat(ultimo, 'grupal');
+                            if (!chatAbierto || chatActual.tipo !== 'grupal') {
+                                noLeidosGrupal++;
+                                actualizarBadgesChat();
+                            }
                         }
                     }
                     chatMensajes = nuevos;
-                    renderChatMensajes();
+                    if (chatActual.tipo === 'grupal' && chatAbierto) renderChatMensajes();
+                    if (tabChatActiva === 'grupal' && chatAbierto) renderListaConversaciones();
                 }
             });
+
+            // ===== CHATS PRIVADOS =====
+            if (sesionActual) {
+                const privRef = window.firebaseRef(window.firebaseDB, 'chats_privados');
+                window.firebaseOnValue(privRef, (snapshot) => {
+                    const data = snapshot.val() || {};
+                    chatsPrivados = data;
+                    
+                    Object.keys(data).forEach(convId => {
+                        if (!convId.includes(sesionActual.user)) return;
+                        const msgs = data[convId] ? Object.values(data[convId]) : [];
+                        const ultimo = msgs[msgs.length - 1];
+                        if (ultimo && ultimo.user !== sesionActual.user) {
+                            const prevMsgs = (_prevPrivados && _prevPrivados[convId]) ? Object.values(_prevPrivados[convId]) : [];
+                            if (msgs.length > prevMsgs.length && _prevPrivados !== undefined) {
+                                if (chatActual.tipo !== 'privado' || chatActual.convId !== convId) {
+                                    noLeidosPrivados[convId] = (noLeidosPrivados[convId] || 0) + 1;
+                                    mostrarNotificacionChat(ultimo, 'privado', convId);
+                                    actualizarBadgesChat();
+                                }
+                            }
+                        }
+                    });
+                    _prevPrivados = JSON.parse(JSON.stringify(data));
+                    
+                    if (chatActual.tipo === 'privado' && chatAbierto) renderChatMensajes();
+                    if (tabChatActiva === 'privados' && chatAbierto) renderListaConversaciones();
+                });
+            }
         }
 
-        // Renderiza la info exclusiva del analista
         function renderAnalistaDashboard() {
             if (sesionActual?.rol !== 'analista') return;
             const nombre = sesionActual.nombre;
@@ -1153,6 +1221,8 @@
                     cardClass = 'vacation'; statusLabel = '<span class="dot-yellow mr-1"></span> VACACIONES'; actionLabel = 'VACACIONES'; textClass = 'text-yellow-600';
                 }
 
+                const mostrarBotonChat = sesionActual && (sesionActual.rol === 'operador' || sesionActual.rol === 'admin') && a.nombre !== sesionActual.nombre;
+
                 html += `<div class="card-analyst ${cardClass} ${busy && a.foto ? 'tooltip-img' : ''}" ${clickAttr}>
                     ${tooltip}
                     <div class="text-[10px] md:text-xs font-extrabold uppercase tracking-wider mb-1 md:mb-2 ${textClass}">
@@ -1164,6 +1234,7 @@
                         <span class="text-[10px] md:text-xs font-bold text-slate-500">Tiempo:</span>
                         ${timeHtml}
                     </div>
+                    ${mostrarBotonChat ? `<button onclick="event.stopPropagation(); abrirChatPrivado('${escapeHtml(a.nombre)}')" class="chat-btn-private"><i class="fa-solid fa-comment-dots mr-1"></i> Chatear</button>` : ''}
                 </div>`;
             });
             g.innerHTML = html;
@@ -1233,7 +1304,7 @@
         }
 
         /* ============================================
-           USUARIOS (CON ELIMINAR)
+           USUARIOS
            ============================================ */
         function crearUsuario() {
             if (sesionActual.rol !== 'admin') return;
@@ -1306,58 +1377,183 @@
         }
 
         /* ============================================
-           CHAT MULTIUSUARIO
+           CHAT MULTIUSUARIO - v19.1 con PRIVADOS
            ============================================ */
-        function toggleEmojiPicker() {
-            const picker = document.getElementById('emoji-picker');
-            picker.classList.toggle('show');
-            if (picker.innerHTML === '') {
-                const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
-                picker.innerHTML = emojis.map(e => `<div class="emoji-btn" onclick="insertEmoji('${e}')">${e}</div>`).join('');
-            }
+        function construirConvId(userA, userB) {
+            return [userA, userB].sort().join('_');
         }
 
-        function insertEmoji(emoji) {
-            const input = document.getElementById('chat-input');
-            input.value += emoji;
-            input.focus();
-            document.getElementById('emoji-picker').classList.remove('show');
+        function nombreDesdeUserId(userId) {
+            return usuariosData[userId]?.nombre || userId;
         }
 
-        function toggleChatPanel() {
-            chatAbierto = !chatAbierto;
-            document.getElementById('chat-panel').classList.toggle('show', chatAbierto);
-            document.getElementById('chat-fab').classList.toggle('hidden', chatAbierto);
-            if (chatAbierto) { 
-                mensajesNoLeidos = 0; 
-                actualizarBadgeChat(); 
-                renderChatMensajes(); 
-                document.getElementById('chat-input').focus(); 
-                document.getElementById('chat-notification').classList.add('translate-x-[150%]'); 
+        function userIdDesdeNombre(nombre) {
+            const u = Object.values(usuariosData).find(x => x.nombre === nombre);
+            return u ? u.user : null;
+        }
+
+        function cambiarTabChat(tab) {
+            tabChatActiva = tab;
+            document.getElementById('tab-grupal').classList.toggle('active', tab === 'grupal');
+            document.getElementById('tab-privados').classList.toggle('active', tab === 'privados');
+            renderListaConversaciones();
+        }
+
+        function renderListaConversaciones() {
+            const cont = document.getElementById('chat-conv-list');
+            if (!cont) return;
+            
+            if (tabChatActiva === 'grupal') {
+                const ultimo = chatMensajes[chatMensajes.length - 1];
+                const badge = noLeidosGrupal > 0 ? `<span class="conv-badge">${noLeidosGrupal}</span>` : '';
+                cont.innerHTML = `
+                    <div class="chat-conv-item ${chatActual.tipo === 'grupal' ? 'active' : ''}" onclick="abrirChatGrupal()">
+                        <div class="conv-avatar" style="background:#C5221F"><i class="fa-solid fa-users"></i></div>
+                        <div class="conv-info">
+                            <div class="conv-name">Chat del Equipo</div>
+                            <div class="conv-last">${ultimo ? escapeHtml(ultimo.nombre) + ': ' + escapeHtml((ultimo.mensaje || '📷 Foto').substring(0,30)) : 'Sin mensajes aún'}</div>
+                        </div>
+                        ${badge}
+                    </div>`;
+                return;
             }
+            
+            // Tab privados
+            const otrosUsuarios = Object.values(usuariosData).filter(u => u.user !== sesionActual.user);
+            const convs = otrosUsuarios.map(u => {
+                const convId = construirConvId(sesionActual.user, u.user);
+                const msgs = chatsPrivados[convId] ? Object.values(chatsPrivados[convId]) : [];
+                const ultimo = msgs[msgs.length - 1];
+                return { usuario: u, convId, msgs, ultimo };
+            }).filter(c => c.msgs.length > 0 || c.usuario.rol === 'analista').sort((a,b) => {
+                const ta = a.ultimo ? a.ultimo.timestamp : 0;
+                const tb = b.ultimo ? b.ultimo.timestamp : 0;
+                return tb - ta;
+            });
+            
+            if (convs.length === 0) {
+                cont.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm">
+                    <i class="fa-regular fa-comments text-3xl mb-2 block opacity-40"></i>
+                    No hay conversaciones privadas aún.<br>
+                    <span class="text-[10px]">Usa el botón "Chatear" en cada módulo.</span>
+                </div>`;
+                return;
+            }
+            
+            cont.innerHTML = convs.map(c => {
+                const badge = noLeidosPrivados[c.convId] ? `<span class="conv-badge">${noLeidosPrivados[c.convId]}</span>` : '';
+                const color = colorAvatar(c.usuario.nombre);
+                const activo = (chatActual.tipo === 'privado' && chatActual.convId === c.convId) ? 'active' : '';
+                return `
+                    <div class="chat-conv-item ${activo}" onclick="abrirChatPrivadoPorId('${c.convId}')">
+                        <div class="conv-avatar" style="background:${color}">${c.usuario.nombre.charAt(0).toUpperCase()}</div>
+                        <div class="conv-info">
+                            <div class="conv-name">${escapeHtml(c.usuario.nombre)} <span class="text-[9px] text-slate-400 uppercase">${c.usuario.rol}</span></div>
+                            <div class="conv-last">${c.ultimo ? escapeHtml(c.ultimo.user === sesionActual.user ? 'Tú: ' : '') + escapeHtml((c.ultimo.mensaje || '📷 Foto').substring(0,30)) : 'Sin mensajes'}</div>
+                        </div>
+                        ${badge}
+                    </div>`;
+            }).join('');
+        }
+
+        function abrirChatGrupal() {
+            chatActual = { tipo: 'grupal', nombre: null, convId: null, otroUser: null };
+            noLeidosGrupal = 0;
+            document.getElementById('chat-list-view').classList.add('hidden');
+            document.getElementById('chat-conversation-view').classList.remove('hidden');
+            document.getElementById('chat-back-btn').classList.add('show');
+            document.getElementById('chat-header-title').textContent = 'Chat del Equipo';
+            document.getElementById('chat-header-icon').innerHTML = '<i class="fa-solid fa-users text-sm"></i>';
+            document.getElementById('chat-header-status').innerHTML = '<span class="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> En línea';
+            renderChatMensajes();
+            actualizarBadgesChat();
+        }
+
+        function abrirChatPrivadoPorId(convId) {
+            const partes = convId.split('_');
+            const otroUser = partes.find(u => u !== sesionActual.user);
+            const otroNombre = nombreDesdeUserId(otroUser);
+            chatActual = { tipo: 'privado', convId, nombre: otroNombre, otroUser };
+            noLeidosPrivados[convId] = 0;
+            document.getElementById('chat-list-view').classList.add('hidden');
+            document.getElementById('chat-conversation-view').classList.remove('hidden');
+            document.getElementById('chat-back-btn').classList.add('show');
+            document.getElementById('chat-header-title').textContent = otroNombre;
+            document.getElementById('chat-header-icon').innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs" style="background:${colorAvatar(otroNombre)}">${otroNombre.charAt(0).toUpperCase()}</div>`;
+            document.getElementById('chat-header-status').innerHTML = '<i class="fa-solid fa-lock text-[9px] mr-1"></i> Conversación privada';
+            renderChatMensajes();
+            actualizarBadgesChat();
+        }
+
+        function abrirChatPrivado(nombreAnalista) {
+            const otroUser = userIdDesdeNombre(nombreAnalista);
+            if (!otroUser) { mostrarToast('Usuario no encontrado. Debe tener cuenta creada.', 'error'); return; }
+            if (otroUser === sesionActual.user) return;
+            const convId = construirConvId(sesionActual.user, otroUser);
+            if (!chatAbierto) toggleChatPanel();
+            tabChatActiva = 'privados';
+            document.getElementById('tab-grupal').classList.remove('active');
+            document.getElementById('tab-privados').classList.add('active');
+            abrirChatPrivadoPorId(convId);
+        }
+
+        function volverListaConversaciones() {
+            document.getElementById('chat-conversation-view').classList.add('hidden');
+            document.getElementById('chat-list-view').classList.remove('hidden');
+            document.getElementById('chat-back-btn').classList.remove('show');
+            document.getElementById('chat-header-title').textContent = 'Mensajes';
+            document.getElementById('chat-header-icon').innerHTML = '<i class="fa-solid fa-comments text-sm"></i>';
+            document.getElementById('chat-header-status').innerHTML = '<span class="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> En línea';
+            renderListaConversaciones();
+        }
+
+        function actualizarBadgesChat() {
+            const totalPriv = Object.values(noLeidosPrivados).reduce((s,n) => s+n, 0);
+            const total = noLeidosGrupal + totalPriv;
+            
+            const b = document.getElementById('chat-badge');
+            if (b) { b.textContent = total; b.classList.toggle('hidden', total === 0); }
+            
+            const bg = document.getElementById('badge-grupal');
+            if (bg) { bg.textContent = noLeidosGrupal; bg.classList.toggle('hidden', noLeidosGrupal === 0); }
+            
+            const bp = document.getElementById('badge-privados');
+            if (bp) { bp.textContent = totalPriv; bp.classList.toggle('hidden', totalPriv === 0); }
         }
 
         function renderChatMensajes() {
             const body = document.getElementById('chat-body');
             if (!body) return;
+            
+            let mensajes = [];
+            if (chatActual.tipo === 'grupal') {
+                mensajes = chatMensajes;
+            } else if (chatActual.tipo === 'privado') {
+                const raw = chatsPrivados[chatActual.convId] || {};
+                mensajes = Object.values(raw).sort((a,b) => a.timestamp - b.timestamp);
+            }
+            
+            if (mensajes.length === 0) {
+                body.innerHTML = `<div class="text-center text-slate-400 text-sm py-10">
+                    <i class="fa-regular fa-comment-dots text-3xl mb-2 block opacity-40"></i>
+                    ${chatActual.tipo === 'grupal' ? 'Sé el primero en escribir al equipo.' : 'Inicia la conversación privada.'}
+                </div>`;
+                return;
+            }
+            
             let html = '';
-            chatMensajes.forEach(m => {
+            mensajes.forEach(m => {
                 const isMine = m.user === sesionActual?.user;
                 const color = colorAvatar(m.nombre);
                 let textoHtml = escapeHtml(m.mensaje);
-                
-                if (m.mensaje.includes('@')) textoHtml = textoHtml.replace(/@([A-Za-z0-9\s]+?)(?=\s|$|[.,!?])/g, '<span class="mention">@$1</span>');
-                
+                if (m.mensaje && m.mensaje.includes('@')) textoHtml = textoHtml.replace(/@([A-Za-z0-9\s]+?)(?=\s|$|[.,!?])/g, '<span class="mention">@$1</span>');
                 let imgHtml = m.foto ? `<img src="${m.foto}" class="mt-2 rounded-lg max-h-40 cursor-pointer border border-white/20 shadow-sm" onclick="abrirModalFoto('${m.foto}')">` : '';
 
                 html += `<div class="chat-msg ${isMine ? 'mine' : ''}">
                     ${!isMine ? `<div class="chat-avatar" style="background:${color}">${m.nombre.charAt(0).toUpperCase()}</div>` : ''}
                     <div class="chat-bubble-wrap">
                         ${!isMine ? `<div class="chat-name">${escapeHtml(m.nombre)}</div>` : ''}
-                        <div class="chat-bubble">
-                            ${textoHtml}
-                            ${imgHtml}
-                        </div>
+                        <div class="chat-bubble">${textoHtml}${imgHtml}</div>
                         <span class="chat-time">${new Date(m.timestamp).toLocaleTimeString('es-PE', {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                 </div>`;
@@ -1366,19 +1562,39 @@
             body.scrollTop = body.scrollHeight;
         }
 
-        function actualizarBadgeChat() {
-            const b = document.getElementById('chat-badge');
-            if (b) { b.textContent = mensajesNoLeidos; b.classList.toggle('hidden', mensajesNoLeidos === 0); }
+        function toggleChatPanel() {
+            chatAbierto = !chatAbierto;
+            document.getElementById('chat-panel').classList.toggle('show', chatAbierto);
+            document.getElementById('chat-fab').classList.toggle('hidden', chatAbierto);
+            if (chatAbierto) {
+                noLeidosGrupal = 0;
+                Object.keys(noLeidosPrivados).forEach(k => noLeidosPrivados[k] = 0);
+                actualizarBadgesChat();
+                renderListaConversaciones();
+                if (chatActual.tipo === 'grupal' && !document.getElementById('chat-conversation-view').classList.contains('hidden')) {
+                    renderChatMensajes();
+                } else if (chatActual.tipo === 'privado' && !document.getElementById('chat-conversation-view').classList.contains('hidden')) {
+                    renderChatMensajes();
+                }
+                document.getElementById('chat-notification').classList.add('translate-x-[150%]');
+            }
         }
 
-        function mostrarNotificacionChat(msg) {
+        function mostrarNotificacionChat(msg, tipo = 'grupal', convId = null) {
             const n = document.getElementById('chat-notification');
             document.getElementById('chat-notif-avatar').textContent = msg.nombre.charAt(0).toUpperCase();
             document.getElementById('chat-notif-avatar').style.background = colorAvatar(msg.nombre);
-            document.getElementById('chat-notif-name').textContent = msg.nombre;
+            document.getElementById('chat-notif-name').textContent = (tipo === 'privado' ? '🔒 ' : '') + msg.nombre;
             document.getElementById('chat-notif-text').textContent = msg.mensaje || '📷 Envió una foto';
             n.classList.remove('translate-x-[150%]');
             setTimeout(() => n.classList.add('translate-x-[150%]'), 5000);
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('chat-input');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('emoji-picker').classList.remove('show');
         }
 
         const chatInput = document.getElementById('chat-input');
@@ -1450,6 +1666,7 @@
             if (!sesionActual || !firebaseListo) return;
             const texto = chatInput.value.trim();
             if (!texto && !tempFotoChat) return;
+            if (!chatActual || (chatActual.tipo === 'privado' && !chatActual.convId)) return;
 
             const msg = {
                 user: sesionActual.user,
@@ -1459,12 +1676,25 @@
                 timestamp: Date.now()
             };
 
-            window.firebasePush(window.firebaseRef(window.firebaseDB, 'chat'), msg);
+            if (chatActual.tipo === 'grupal') {
+                window.firebasePush(window.firebaseRef(window.firebaseDB, 'chat'), msg);
+            } else {
+                window.firebasePush(window.firebaseRef(window.firebaseDB, `chats_privados/${chatActual.convId}`), msg);
+            }
             
             chatInput.value = '';
             tempFotoChat = null;
             document.getElementById('chat-photo-preview').classList.add('hidden');
             document.getElementById('chat-file').value = '';
+        }
+
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emoji-picker');
+            picker.classList.toggle('show');
+            if (picker.innerHTML === '') {
+                const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
+                picker.innerHTML = emojis.map(e => `<div class="emoji-btn" onclick="insertEmoji('${e}')">${e}</div>`).join('');
+            }
         }
 
         function exportarHistorialCSV() {
